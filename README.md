@@ -175,46 +175,6 @@ logs_reports/
 | *"¿Qué programas tengo instalados?"* | `inventario_hw_sw.ps1` | Generar listado completo |
 
 
-### **Flujo de Trabajo Recomendado para Visitas Técnicas**
-
-#### **1. Llegada al Cliente (Primeros 5 minutos)**
-```
-1. Ejecutar quick_assessment.ps1
-   └─ Evaluación inicial del estado general
-
-2. Si hay problemas evidentes:
-   └─ Ejecutar problem_detector.ps1
-   └─ Identificar causa raíz
-```
-
-#### **2. Diagnóstico Detallado (10-15 minutos)**
-```
-3. Según el problema detectado:
-   ├─ Lentitud → diagnostico_rendimiento.ps1
-   ├─ Red → diagnostico_red.ps1
-   ├─ Seguridad → escaneo_seguridad.ps1
-   └─ General → diagnostico_completo.ps1
-```
-
-#### **3. Antes de Hacer Cambios**
-```
-4. Protección de datos:
-   └─ Ejecutar backups.ps1 (archivos importantes)
-
-5. Documentar estado inicial:
-   └─ Guardar reportes para comparación posterior
-```
-
-#### **4. Al Finalizar el Servicio**
-```
-6. Verificación final:
-   └─ Ejecutar quick_assessment.ps1 (confirmar mejoras)
-
-7. Entrega al cliente:
-   └─ Mostrar reporte de diagnostico_completo.ps1
-   └─ Explicar cambios realizados
-```
-
 ---
 
 
