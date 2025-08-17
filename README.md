@@ -115,46 +115,56 @@ Conjunto de scripts PowerShell diseñados específicamente para facilitar el tra
 - **Respalda:** Documentos, configuraciones, datos críticos
 - **Cuándo usar:** Antes de formatear, reinstalar SO, cambios importantes
 
-**8. `recuperacion_archivos.ps1` - Recuperación de Datos**
-- ✅ **Para qué:** "Se me borraron archivos importantes"
-- 🎯 **Recupera:** Archivos eliminados, papelera, temporales
-- 💼 **Cuándo usar:** Recuperación de datos, archivos eliminados accidentalmente
 
-### 🔒 **Scripts de Seguridad e Inventario**
+**8. `recuperacion_archivos.ps1` - Recuperación de Datos**
+- **Para qué:** "Se me borraron archivos importantes"
+- **Recupera:** Archivos eliminados, papelera, temporales
+- **Cuándo usar:** Recuperación de datos, archivos eliminados accidentalmente
+
+
+### **Scripts de Seguridad e Inventario**
+
 
 **9. `escaneo_seguridad.ps1` - Verificación de Seguridad**
-- ✅ **Para qué:** Verificar estado de seguridad del equipo
-- 🎯 **Verifica:** Antivirus, firewall, actualizaciones, vulnerabilidades
-- 💼 **Cuándo usar:** Auditoría de seguridad, después de infección
+- **Para qué:** Verificar estado de seguridad del equipo
+- **Verifica:** Antivirus, firewall, actualizaciones, vulnerabilidades
+- **Cuándo usar:** Auditoría de seguridad, después de infección
+
 
 **10. `inventario_hw_sw.ps1` - Inventario Completo**
-- ✅ **Para qué:** Documentar hardware y software instalado
-- 🎯 **Lista:** Componentes, programas, versiones, licencias
-- 💼 **Cuándo usar:** Inventario de empresa, valoración de equipo
+- **Para qué:** Documentar hardware y software instalado
+- **Lista:** Componentes, programas, versiones, licencias
+- **Cuándo usar:** Inventario de empresa, valoración de equipo
+
 
 **11. `validacion_usuario.ps1` - Configuración de Usuario**
-- ✅ **Para qué:** Verificar perfiles y permisos de usuario
-- 🎯 **Verifica:** Cuentas, permisos, configuraciones, políticas
-- 💼 **Cuándo usar:** Problemas de acceso, configuración de nuevos usuarios
+- **Para qué:** Verificar perfiles y permisos de usuario
+- **Verifica:** Cuentas, permisos, configuraciones, políticas
+- **Cuándo usar:** Problemas de acceso, configuración de nuevos usuarios
 
 ---
 
-## 📁 **DÓNDE ENCONTRAR LOS REPORTES**
+
+## **DÓNDE ENCONTRAR LOS REPORTES**
 
 Todos los scripts guardan automáticamente sus resultados en:
+
 ```
-📂 logs_reports/
+logs_reports/
 ├── diagnostico_rapido_2024-01-15_14-30-25.html
 ├── problemas_detectados_2024-01-15_14-35-12.html
 ├── diagnostico_completo_2024-01-15_14-40-18.html
 └── ...
 ```
 
-💡 **Tip:** Los archivos incluyen fecha y hora para fácil identificación y seguimiento.
 
-## 🎯 **CASOS DE USO PARA TÉCNICOS DE SOPORTE**
+**Tip:** Los archivos incluyen fecha y hora para fácil identificación y seguimiento.
 
-### 📞 **Escenarios Típicos de Llamadas de Soporte**
+
+## **CASOS DE USO PARA TÉCNICOS DE SOPORTE**
+
+
+### **Escenarios Típicos de Llamadas de Soporte**
 
 | **El cliente dice...** | **Script recomendado** | **Qué hacer después** |
 |------------------------|-------------------------|----------------------|
@@ -164,7 +174,8 @@ Todos los scripts guardan automáticamente sus resultados en:
 | *"Necesito un reporte del equipo"* | `diagnostico_completo.ps1` | Entregar reporte HTML al cliente |
 | *"¿Qué programas tengo instalados?"* | `inventario_hw_sw.ps1` | Generar listado completo |
 
-### 🏢 **Flujo de Trabajo Recomendado para Visitas Técnicas**
+
+### **Flujo de Trabajo Recomendado para Visitas Técnicas**
 
 #### **1. Llegada al Cliente (Primeros 5 minutos)**
 ```
@@ -206,21 +217,25 @@ Todos los scripts guardan automáticamente sus resultados en:
 
 ---
 
-## ⚙️ **REQUISITOS Y CONFIGURACIÓN**
 
-### 💻 **Requisitos del Sistema**
+## **REQUISITOS Y CONFIGURACIÓN**
+
+
+### **Requisitos del Sistema**
 - **Windows:** 10, 11, Server 2016+
 - **PowerShell:** Versión 5.1 o superior (incluido en Windows)
 - **Permisos:** Usuario normal (Administrador recomendado para funcionalidad completa)
 - **Espacio:** ~50MB para reportes y logs
 
-### 🔧 **Configuración Rápida**
+
+### **Configuración Rápida**
 1. Descargar y extraer en una carpeta (ej: `C:\ITTools\`)
 2. **¡Listo!** No requiere instalación adicional
 3. Todos los scripts funcionan desde la misma carpeta
 4. Los reportes se guardan automáticamente en `logs_reports\`
 
-### 🛡️ **Manejo de Políticas de Ejecución**
+
+### **Manejo de Políticas de Ejecución**
 Los scripts se configuran automáticamente, pero si hay problemas:
 
 ```powershell
@@ -231,9 +246,11 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 ```
 
-## 🆘 **SOLUCIÓN DE PROBLEMAS COMUNES**
 
-### ❌ **"No puedo ejecutar los scripts"**
+## **SOLUCIÓN DE PROBLEMAS COMUNES**
+
+
+### **"No puedo ejecutar los scripts"**
 **Síntomas:** Error de políticas de ejecución, scripts no se ejecutan
 
 **Soluciones:**
@@ -247,7 +264,8 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
    powershell -ExecutionPolicy Bypass .\quick_assessment.ps1
    ```
 
-### ❌ **"Los reportes no se generan"**
+
+### **"Los reportes no se generan"**
 **Síntomas:** Scripts ejecutan pero no aparecen reportes HTML
 
 **Soluciones:**
@@ -255,7 +273,8 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 2. Ejecutar como administrador
 3. Verificar permisos de escritura en la carpeta
 
-### ❌ **"El diagnóstico de red falla"**
+
+### **"El diagnóstico de red falla"**
 **Síntomas:** No detecta adaptadores o falla conectividad
 
 **Soluciones:**
@@ -263,7 +282,8 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 2. Ejecutar como administrador
 3. Verificar que Windows Firewall permite ping
 
-### ❌ **"Scripts van muy lentos"**
+
+### **"Scripts van muy lentos"**
 **Síntomas:** Los diagnósticos tardan mucho tiempo
 
 **Soluciones:**
@@ -273,14 +293,17 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 
 ---
 
-## 📞 **SOPORTE Y AYUDA**
 
-### 🛠️ **Para Técnicos de Soporte**
+## **SOPORTE Y AYUDA**
+
+
+### **Para Técnicos de Soporte**
 - **GitHub Issues:** [Reportar problemas o sugerir mejoras](../../issues)
 - **Documentación:** Ver archivos de ejemplo en `logs_reports\`
 - **Comunidad:** Compartir experiencias en Issues
 
-### 📚 **Recursos Adicionales**
+
+### **Recursos Adicionales**
 - **Ejemplos de reportes:** En la carpeta `logs_reports\` después de ejecutar
 - **Logs detallados:** Cada script genera logs de errores si algo falla
 - **Códigos de error:** Revisar archivo `ErrorHandler.ps1` para detalles
@@ -295,4 +318,5 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ---
 
-*Desarrollado por y para técnicos de soporte IT* 🛠️
+
+*Desarrollado por y para técnicos de soporte IT*
