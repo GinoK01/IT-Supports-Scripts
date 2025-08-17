@@ -1,30 +1,34 @@
+
 # IT-Support-Scripts
-🛠️ **Herramientas profesionales de diagnóstico para técnicos de soporte IT**
+**Herramientas profesionales de diagnóstico para técnicos de soporte IT**
 
 Conjunto de scripts PowerShell diseñados específicamente para facilitar el trabajo diario de técnicos de soporte, con diagnósticos automatizados y reportes profesionales para clientes.
 
 ---
 
-## 🚀 **INICIO RÁPIDO PARA TÉCNICOS**
 
-### 📋 **¿Qué problema tiene el equipo? Elige tu herramienta:**
+## **INICIO RÁPIDO PARA TÉCNICOS**
+
+
+### **¿Qué problema tiene el equipo? Elige tu herramienta:**
 
 | **Situación** | **Script Recomendado** | **Uso** |
 |---------------|------------------------|---------|
-| 🔍 **Primera revisión del equipo** | `quick_assessment.ps1` | Evaluación inicial rápida |
-| 🚨 **El equipo está muy lento** | `problem_detector.ps1` | Encuentra problemas automáticamente |
-| 📊 **Necesito un reporte completo** | `diagnostico_completo.ps1` | Análisis exhaustivo para clientes |
-| 🌐 **Problemas de internet/red** | `diagnostico_red.ps1` | Diagnóstico específico de conectividad |
-| 💾 **El equipo se queda sin memoria** | `diagnostico_rendimiento.ps1` | Análisis de CPU, RAM y procesos |
+| **Primera revisión del equipo** | `quick_assessment.ps1` | Evaluación inicial rápida |
+| **El equipo está muy lento** | `problem_detector.ps1` | Encuentra problemas automáticamente |
+| **Necesito un reporte completo** | `diagnostico_completo.ps1` | Análisis exhaustivo para clientes |
+| **Problemas de internet/red** | `diagnostico_red.ps1` | Diagnóstico específico de conectividad |
+| **El equipo se queda sin memoria** | `diagnostico_rendimiento.ps1` | Análisis de CPU, RAM y procesos |
 
-### 🎯 **MÉTODOS DE EJECUCIÓN (del más fácil al más técnico):**
 
-1. **📁 Doble clic en `ejecutar_master.bat`** ← **MÁS FÁCIL**
+### **MÉTODOS DE EJECUCIÓN (del más fácil al más técnico):**
+
+1. **Doble clic en `ejecutar_master.bat`** ← **MÁS FÁCIL**
    - Menú interactivo con todas las opciones
    - Maneja automáticamente problemas de permisos
    - Ideal para técnicos que prefieren interfaces gráficas
 
-2. **💻 Ejecutar scripts individuales:**
+2. **Ejecutar scripts individuales:**
    ```powershell
    # Para diagnóstico rápido (recomendado para primera visita)
    .\quick_assessment.ps1
@@ -36,66 +40,80 @@ Conjunto de scripts PowerShell diseñados específicamente para facilitar el tra
    .\diagnostico_completo.ps1
    ```
 
-3. **🔧 Si hay problemas de permisos:**
+3. **Si hay problemas de permisos:**
    - Clic derecho en PowerShell → "Ejecutar como administrador"
    - Navegar a la carpeta y ejecutar el script deseado
 
-> 💡 **Tip para técnicos:** Todos los reportes se guardan automáticamente en la carpeta `logs_reports` con fecha y hora para fácil seguimiento.
 
-## 🔧 **HERRAMIENTAS PRINCIPALES PARA TÉCNICOS**
+> **Tip para técnicos:** Todos los reportes se guardan automáticamente en la carpeta `logs_reports` con fecha y hora para fácil seguimiento.
 
-### 🏃‍♂️ **Scripts de Diagnóstico Rápido**
+
+## **HERRAMIENTAS PRINCIPALES PARA TÉCNICOS**
+
+
+### **Scripts de Diagnóstico Rápido**
 > Ideales para visitas técnicas y primera evaluación
 
+
 **1. `quick_assessment.ps1` - Evaluación Express (2-3 min)**
-- ✅ **Para qué:** Primera revisión de cualquier equipo
-- 🎯 **Detecta:** CPU alto, poca memoria, problemas de red básicos
-- 📄 **Resultado:** Reporte simple con estado general del sistema
-- 💼 **Ideal para:** Visitas rápidas, evaluación antes de presupuesto
+- **Para qué:** Primera revisión de cualquier equipo
+- **Detecta:** CPU alto, poca memoria, problemas de red básicos
+- **Resultado:** Reporte simple con estado general del sistema
+- **Ideal para:** Visitas rápidas, evaluación antes de presupuesto
+
 
 **2. `problem_detector.ps1` - Detective Automático (3-5 min)**
-- ✅ **Para qué:** Cuando el cliente dice "la computadora está lenta"
-- 🎯 **Detecta:** Disco lleno, memoria agotada, procesos problemáticos, servicios detenidos
-- 📄 **Resultado:** Lista clara de problemas encontrados con prioridades
-- 💼 **Ideal para:** Diagnóstico inicial, encontrar la causa de lentitud
+- **Para qué:** Cuando el cliente dice "la computadora está lenta"
+- **Detecta:** Disco lleno, memoria agotada, procesos problemáticos, servicios detenidos
+- **Resultado:** Lista clara de problemas encontrados con prioridades
+- **Ideal para:** Diagnóstico inicial, encontrar la causa de lentitud
 
-### 📊 **Scripts de Reporte Completo**
+
+### **Scripts de Reporte Completo**
 > Para entregar al cliente o documentar el servicio
 
-**3. `diagnostico_completo.ps1` - Reporte Profesional (5-10 min)**
-- ✅ **Para qué:** Generar reporte completo para el cliente
-- 🎯 **Incluye:** Inventario de hardware, software, rendimiento, seguridad, red
-- 📄 **Resultado:** Reporte HTML profesional con gráficos y recomendaciones
-- 💼 **Ideal para:** Entrega al cliente, documentación del servicio
 
-### 🌐 **Scripts Especializados**
+**3. `diagnostico_completo.ps1` - Reporte Profesional (5-10 min)**
+- **Para qué:** Generar reporte completo para el cliente
+- **Incluye:** Inventario de hardware, software, rendimiento, seguridad, red
+- **Resultado:** Reporte HTML profesional con gráficos y recomendaciones
+- **Ideal para:** Entrega al cliente, documentación del servicio
+
+
+### **Scripts Especializados**
 > Para problemas específicos
 
+
 **4. `diagnostico_red.ps1` - Problemas de Internet (2-4 min)**
-- ✅ **Para qué:** "No me funciona internet" / "La red va lenta"
-- 🎯 **Verifica:** Configuración IP, DNS, conectividad, velocidad
-- 📄 **Resultado:** Diagnóstico completo de conectividad
-- 💼 **Ideal para:** Problemas de conectividad, configuración de red
+- **Para qué:** "No me funciona internet" / "La red va lenta"
+- **Verifica:** Configuración IP, DNS, conectividad, velocidad
+- **Resultado:** Diagnóstico completo de conectividad
+- **Ideal para:** Problemas de conectividad, configuración de red
+
 
 **5. `diagnostico_rendimiento.ps1` - Análisis de Lentitud (3-5 min)**
-- ✅ **Para qué:** "La computadora va muy lenta"
-- 🎯 **Analiza:** Uso de CPU, memoria RAM, procesos pesados, disco
-- 📄 **Resultado:** Identificación de procesos problemáticos
-- 💼 **Ideal para:** Optimización de rendimiento, limpieza de sistema
+- **Para qué:** "La computadora va muy lenta"
+- **Analiza:** Uso de CPU, memoria RAM, procesos pesados, disco
+- **Resultado:** Identificación de procesos problemáticos
+- **Ideal para:** Optimización de rendimiento, limpieza de sistema
 
-## 🛠️ **HERRAMIENTAS DE MANTENIMIENTO**
 
-### 🔄 **Scripts de Mantenimiento Preventivo**
+## **HERRAMIENTAS DE MANTENIMIENTO**
+
+
+### **Scripts de Mantenimiento Preventivo**
+
 
 **6. `limpieza_mantenimiento.ps1` - Limpieza Automática**
-- ✅ **Para qué:** Mantenimiento preventivo del sistema
-- 🎯 **Limpia:** Archivos temporales, cache, logs antiguos
-- 💼 **Cuándo usar:** Mantenimiento programado, antes de entregar equipo
+- **Para qué:** Mantenimiento preventivo del sistema
+- **Limpia:** Archivos temporales, cache, logs antiguos
+- **Cuándo usar:** Mantenimiento programado, antes de entregar equipo
+
 
 **7. `backups.ps1` - Sistema de Respaldo**
-- ✅ **Para qué:** Proteger datos importantes antes de cambios
-- 🎯 **Respalda:** Documentos, configuraciones, datos críticos
-- 💼 **Cuándo usar:** Antes de formatear, reinstalar SO, cambios importantes
+- **Para qué:** Proteger datos importantes antes de cambios
+- **Respalda:** Documentos, configuraciones, datos críticos
+- **Cuándo usar:** Antes de formatear, reinstalar SO, cambios importantes
 
 **8. `recuperacion_archivos.ps1` - Recuperación de Datos**
 - ✅ **Para qué:** "Se me borraron archivos importantes"
