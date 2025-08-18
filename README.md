@@ -1,153 +1,151 @@
 
 # IT-Support-Scripts
-**Herramientas profesionales de diagnóstico para técnicos de soporte IT**
+**Professional diagnostic tools for IT support technicians**
 
-Conjunto de scripts PowerShell diseñados específicamente para facilitar el trabajo diario de técnicos de soporte, con diagnósticos automatizados y reportes profesionales para clientes.
+A collection of PowerShell scripts designed specifically to make daily work easier for support technicians, with automated diagnostics and professional reports for clients.
 
 ---
 
 
-## **INICIO RÁPIDO PARA TÉCNICOS**
+## **QUICK START FOR TECHNICIANS**
 
 
-### **¿Qué problema tiene el equipo? Elige tu herramienta:**
+### **What's wrong with the computer? Choose your tool:**
 
-| **Situación** | **Script Recomendado** | **Uso** |
+| **Situation** | **Recommended Script** | **Use** |
 |---------------|------------------------|---------|
-| **Primera revisión del equipo** | `quick_assessment.ps1` | Evaluación inicial rápida |
-| **El equipo está muy lento** | `problem_detector.ps1` | Encuentra problemas automáticamente |
-| **Necesito un reporte completo** | `diagnostico_completo.ps1` | Análisis exhaustivo para clientes |
-| **Problemas de internet/red** | `diagnostico_red.ps1` | Diagnóstico específico de conectividad |
-| **El equipo se queda sin memoria** | `diagnostico_rendimiento.ps1` | Análisis de CPU, RAM y procesos |
+| **First computer check** | `quick_assessment.ps1` | Quick initial evaluation |
+| **Computer is very slow** | `problem_detector.ps1` | Finds problems automatically |
+| **Need a complete report** | `diagnostico_completo.ps1` | Full analysis for clients |
+| **Internet/network problems** | `diagnostico_red.ps1` | Specific connectivity diagnosis |
+| **Computer runs out of memory** | `diagnostico_rendimiento.ps1` | CPU, RAM and process analysis |
 
 
-### **MÉTODOS DE EJECUCIÓN (del más fácil al más técnico):**
+### **HOW TO RUN (from easiest to most technical):**
 
-1. **Doble clic en `ejecutar_master.bat`** ← **MÁS FÁCIL**
-   - Menú interactivo con todas las opciones
-   - Maneja automáticamente problemas de permisos
-   - Ideal para técnicos que prefieren interfaces gráficas
+1. **Double-click on `ejecutar_master.bat`** ← **EASIEST**
+   - Interactive menu with all options
+   - Automatically handles permission problems
+   - Great for technicians who prefer visual interfaces
 
-2. **Ejecutar scripts individuales:**
+2. **Run individual scripts:**
    ```powershell
-   # Para diagnóstico rápido (recomendado para primera visita)
+   # For quick diagnosis (recommended for first visit)
    .\quick_assessment.ps1
    
-   # Para detectar problemas automáticamente
+   # To detect problems automatically
    .\problem_detector.ps1
    
-   # Para reporte completo al cliente
+   # For complete client report
    .\diagnostico_completo.ps1
    ```
 
-3. **Si hay problemas de permisos:**
-   - Clic derecho en PowerShell → "Ejecutar como administrador"
-   - Navegar a la carpeta y ejecutar el script deseado
+3. **If you have permission problems:**
+   - Right-click on PowerShell → "Run as administrator"
+   - Navigate to the folder and run the desired script
 
 
-> **Tip para técnicos:** Todos los reportes se guardan automáticamente en la carpeta `logs_reports` con fecha y hora para fácil seguimiento.
+> **Tip for technicians:** All reports are automatically saved in the `logs_reports` folder with date and time for easy tracking.
 
 
-## **HERRAMIENTAS PRINCIPALES PARA TÉCNICOS**
+## **MAIN TOOLS FOR TECHNICIANS**
 
 
-### **Scripts de Diagnóstico Rápido**
-> Ideales para visitas técnicas y primera evaluación
+### **Quick Diagnostic Scripts**
+> Perfect for technical visits and first evaluation
 
 
-**1. `quick_assessment.ps1` - Evaluación Express (2-3 min)**
-- **Para qué:** Primera revisión de cualquier equipo
-- **Detecta:** CPU alto, poca memoria, problemas de red básicos
-- **Resultado:** Reporte simple con estado general del sistema
-- **Ideal para:** Visitas rápidas, evaluación antes de presupuesto
+**1. `quick_assessment.ps1` - Express Evaluation (2-3 min)**
+- **What it does:** First check of any computer
+- **Detects:** High CPU, low memory, basic network problems
+- **Result:** Simple report with general system status
+- **Great for:** Quick visits, evaluation before quotes
+
+**2. `problem_detector.ps1` - Automatic Detective (3-5 min)**
+- **What it does:** When the client says "the computer is slow"
+- **Detects:** Full disk, exhausted memory, problematic processes, stopped services
+- **Result:** Clear list of problems found with priorities
+- **Great for:** Initial diagnosis, finding the cause of slowness
 
 
-**2. `problem_detector.ps1` - Detective Automático (3-5 min)**
-- **Para qué:** Cuando el cliente dice "la computadora está lenta"
-- **Detecta:** Disco lleno, memoria agotada, procesos problemáticos, servicios detenidos
-- **Resultado:** Lista clara de problemas encontrados con prioridades
-- **Ideal para:** Diagnóstico inicial, encontrar la causa de lentitud
+### **Complete Report Scripts**
+> For delivering to clients or documenting the service
 
 
-### **Scripts de Reporte Completo**
-> Para entregar al cliente o documentar el servicio
+**3. `diagnostico_completo.ps1` - Professional Report (5-10 min)**
+- **What it does:** Generate complete report for the client
+- **Includes:** Hardware inventory, software, performance, security, network
+- **Result:** Professional HTML report with charts and recommendations
+- **Great for:** Client delivery, service documentation
 
 
-**3. `diagnostico_completo.ps1` - Reporte Profesional (5-10 min)**
-- **Para qué:** Generar reporte completo para el cliente
-- **Incluye:** Inventario de hardware, software, rendimiento, seguridad, red
-- **Resultado:** Reporte HTML profesional con gráficos y recomendaciones
-- **Ideal para:** Entrega al cliente, documentación del servicio
+### **Specialized Scripts**
+> For specific problems
 
 
-### **Scripts Especializados**
-> Para problemas específicos
+**4. `diagnostico_red.ps1` - Internet Problems (2-4 min)**
+- **What it does:** "Internet doesn't work" / "Network is slow"
+- **Checks:** IP configuration, DNS, connectivity, speed
+- **Result:** Complete connectivity diagnosis
+- **Great for:** Connectivity problems, network configuration
+
+**5. `diagnostico_rendimiento.ps1` - Slowness Analysis (3-5 min)**
+- **What it does:** "The computer is very slow"
+- **Analyzes:** CPU usage, RAM memory, heavy processes, disk
+- **Result:** Identification of problematic processes
+- **Great for:** Performance optimization, system cleanup
 
 
-**4. `diagnostico_red.ps1` - Problemas de Internet (2-4 min)**
-- **Para qué:** "No me funciona internet" / "La red va lenta"
-- **Verifica:** Configuración IP, DNS, conectividad, velocidad
-- **Resultado:** Diagnóstico completo de conectividad
-- **Ideal para:** Problemas de conectividad, configuración de red
+## **MAINTENANCE TOOLS**
 
 
-**5. `diagnostico_rendimiento.ps1` - Análisis de Lentitud (3-5 min)**
-- **Para qué:** "La computadora va muy lenta"
-- **Analiza:** Uso de CPU, memoria RAM, procesos pesados, disco
-- **Resultado:** Identificación de procesos problemáticos
-- **Ideal para:** Optimización de rendimiento, limpieza de sistema
+### **Preventive Maintenance Scripts**
 
 
-## **HERRAMIENTAS DE MANTENIMIENTO**
+**6. `limpieza_mantenimiento.ps1` - Automatic Cleanup**
+- **What it does:** Preventive system maintenance
+- **Cleans:** Temporary files, cache, old logs
+- **When to use:** Scheduled maintenance, before delivering computer
 
 
-### **Scripts de Mantenimiento Preventivo**
+**7. `backups.ps1` - Backup System**
+- **What it does:** Protect important data before changes
+- **Backs up:** Documents, configurations, critical data
+- **When to use:** Before formatting, reinstalling OS, important changes
 
 
-**6. `limpieza_mantenimiento.ps1` - Limpieza Automática**
-- **Para qué:** Mantenimiento preventivo del sistema
-- **Limpia:** Archivos temporales, cache, logs antiguos
-- **Cuándo usar:** Mantenimiento programado, antes de entregar equipo
+**8. `recuperacion_archivos.ps1` - Data Recovery**
+- **What it does:** "My important files got deleted"
+- **Recovers:** Deleted files, recycle bin, temporary files
+- **When to use:** Data recovery, accidentally deleted files
 
 
-**7. `backups.ps1` - Sistema de Respaldo**
-- **Para qué:** Proteger datos importantes antes de cambios
-- **Respalda:** Documentos, configuraciones, datos críticos
-- **Cuándo usar:** Antes de formatear, reinstalar SO, cambios importantes
+### **Security and Inventory Scripts**
 
 
-**8. `recuperacion_archivos.ps1` - Recuperación de Datos**
-- **Para qué:** "Se me borraron archivos importantes"
-- **Recupera:** Archivos eliminados, papelera, temporales
-- **Cuándo usar:** Recuperación de datos, archivos eliminados accidentalmente
+**9. `escaneo_seguridad.ps1` - Security Check**
+- **What it does:** Check computer security status
+- **Checks:** Antivirus, firewall, updates, vulnerabilities
+- **When to use:** Security audit, after infection
 
 
-### **Scripts de Seguridad e Inventario**
+**10. `inventario_hw_sw.ps1` - Complete Inventory**
+- **What it does:** Document installed hardware and software
+- **Lists:** Components, programs, versions, licenses
+- **When to use:** Company inventory, computer valuation
 
 
-**9. `escaneo_seguridad.ps1` - Verificación de Seguridad**
-- **Para qué:** Verificar estado de seguridad del equipo
-- **Verifica:** Antivirus, firewall, actualizaciones, vulnerabilidades
-- **Cuándo usar:** Auditoría de seguridad, después de infección
-
-
-**10. `inventario_hw_sw.ps1` - Inventario Completo**
-- **Para qué:** Documentar hardware y software instalado
-- **Lista:** Componentes, programas, versiones, licencias
-- **Cuándo usar:** Inventario de empresa, valoración de equipo
-
-
-**11. `validacion_usuario.ps1` - Configuración de Usuario**
-- **Para qué:** Verificar perfiles y permisos de usuario
-- **Verifica:** Cuentas, permisos, configuraciones, políticas
-- **Cuándo usar:** Problemas de acceso, configuración de nuevos usuarios
+**11. `validacion_usuario.ps1` - User Configuration**
+- **What it does:** Check user profiles and permissions
+- **Checks:** Accounts, permissions, configurations, policies
+- **When to use:** Access problems, setting up new users
 
 ---
 
 
-## **DÓNDE ENCONTRAR LOS REPORTES**
+## **WHERE TO FIND THE REPORTS**
 
-Todos los scripts guardan automáticamente sus resultados en:
+All scripts automatically save their results in:
 
 ```
 logs_reports/
@@ -158,125 +156,125 @@ logs_reports/
 ```
 
 
-**Tip:** Los archivos incluyen fecha y hora para fácil identificación y seguimiento.
+**Tip:** Files include date and time for easy identification and tracking.
 
 
-## **CASOS DE USO PARA TÉCNICOS DE SOPORTE**
+## **USE CASES FOR SUPPORT TECHNICIANS**
 
 
-### **Escenarios Típicos de Llamadas de Soporte**
+### **Typical Support Call Scenarios**
 
-| **El cliente dice...** | **Script recomendado** | **Qué hacer después** |
+| **Client says...** | **Recommended Script** | **What to do next** |
 |------------------------|-------------------------|----------------------|
-| *"La computadora está muy lenta"* | `problem_detector.ps1` | Revisar procesos problemáticos y memoria |
-| *"No me funciona internet"* | `diagnostico_red.ps1` | Verificar configuración y conectividad |
-| *"Se me borraron archivos"* | `recuperacion_archivos.ps1` | Buscar en papelera y temporales |
-| *"Necesito un reporte del equipo"* | `diagnostico_completo.ps1` | Entregar reporte HTML al cliente |
-| *"¿Qué programas tengo instalados?"* | `inventario_hw_sw.ps1` | Generar listado completo |
+| *"The computer is very slow"* | `problem_detector.ps1` | Check problematic processes and memory |
+| *"Internet doesn't work"* | `diagnostico_red.ps1` | Check configuration and connectivity |
+| *"My files got deleted"* | `recuperacion_archivos.ps1` | Search in recycle bin and temporary files |
+| *"I need a computer report"* | `diagnostico_completo.ps1` | Deliver HTML report to client |
+| *"What programs do I have installed?"* | `inventario_hw_sw.ps1` | Generate complete list |
 
 
 ---
 
 
-## **REQUISITOS Y CONFIGURACIÓN**
+## **REQUIREMENTS AND SETUP**
 
 
-### **Requisitos del Sistema**
+### **System Requirements**
 - **Windows:** 10, 11, Server 2016+
-- **PowerShell:** Versión 5.1 o superior (incluido en Windows)
-- **Permisos:** Usuario normal (Administrador recomendado para funcionalidad completa)
-- **Espacio:** ~50MB para reportes y logs
+- **PowerShell:** Version 5.1 or higher (included in Windows)
+- **Permissions:** Normal user (Administrator recommended for full functionality)
+- **Space:** ~50MB for reports and logs
 
 
-### **Configuración Rápida**
-1. Descargar y extraer en una carpeta (ej: `C:\ITTools\`)
-2. **¡Listo!** No requiere instalación adicional
-3. Todos los scripts funcionan desde la misma carpeta
-4. Los reportes se guardan automáticamente en `logs_reports\`
+### **Quick Setup**
+1. Download and extract to a folder (e.g., `C:\ITTools\`)
+2. **Ready!** No additional installation required
+3. All scripts work from the same folder
+4. Reports are automatically saved in `logs_reports\`
 
 
-### **Manejo de Políticas de Ejecución**
-Los scripts se configuran automáticamente, pero si hay problemas:
+### **Execution Policy Management**
+Scripts configure themselves automatically, but if there are problems:
 
 ```powershell
-# Método 1: Configuración temporal (recomendado)
+# Method 1: Temporary configuration (recommended)
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
-# Método 2: Para el usuario actual
+# Method 2: For current user
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 ```
 
 
-## **SOLUCIÓN DE PROBLEMAS COMUNES**
+## **COMMON PROBLEM SOLUTIONS**
 
 
-### **"No puedo ejecutar los scripts"**
-**Síntomas:** Error de políticas de ejecución, scripts no se ejecutan
+### **"I can't run the scripts"**
+**Symptoms:** Execution policy error, scripts don't run
 
-**Soluciones:**
-1. **Método más fácil:** Usar `ejecutar_master.bat` (doble clic)
-2. **PowerShell como Admin:**
+**Solutions:**
+1. **Easiest method:** Use `ejecutar_master.bat` (double-click)
+2. **PowerShell as Admin:**
    ```powershell
    Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
    ```
-3. **Ejecución temporal:**
+3. **Temporary execution:**
    ```powershell
    powershell -ExecutionPolicy Bypass .\quick_assessment.ps1
    ```
 
 
-### **"Los reportes no se generan"**
-**Síntomas:** Scripts ejecutan pero no aparecen reportes HTML
+### **"Reports don't generate"**
+**Symptoms:** Scripts run but HTML reports don't appear
 
-**Soluciones:**
-1. Verificar que existe la carpeta `logs_reports\`
-2. Ejecutar como administrador
-3. Verificar permisos de escritura en la carpeta
-
-
-### **"El diagnóstico de red falla"**
-**Síntomas:** No detecta adaptadores o falla conectividad
-
-**Soluciones:**
-1. Verificar que hay adaptadores de red activos
-2. Ejecutar como administrador
-3. Verificar que Windows Firewall permite ping
+**Solutions:**
+1. Check that the `logs_reports\` folder exists
+2. Run as administrator
+3. Check write permissions on the folder
 
 
-### **"Scripts van muy lentos"**
-**Síntomas:** Los diagnósticos tardan mucho tiempo
+### **"Network diagnosis fails"**
+**Symptoms:** Doesn't detect adapters or connectivity fails
 
-**Soluciones:**
-1. Cerrar programas innecesarios antes de ejecutar
-2. Usar `quick_assessment.ps1` para diagnósticos rápidos
-3. Verificar que el antivirus no esté escaneando los scripts
-
----
+**Solutions:**
+1. Check that there are active network adapters
+2. Run as administrator
+3. Check that Windows Firewall allows ping
 
 
-## **SOPORTE Y AYUDA**
+### **"Scripts are very slow"**
+**Symptoms:** Diagnostics take a long time
 
-
-### **Para Técnicos de Soporte**
-- **GitHub Issues:** [Reportar problemas o sugerir mejoras](../../issues)
-- **Documentación:** Ver archivos de ejemplo en `logs_reports\`
-- **Comunidad:** Compartir experiencias en Issues
-
-
-### **Recursos Adicionales**
-- **Ejemplos de reportes:** En la carpeta `logs_reports\` después de ejecutar
-- **Logs detallados:** Cada script genera logs de errores si algo falla
-- **Códigos de error:** Revisar archivo `ErrorHandler.ps1` para detalles
-
----
-
-## 📄 **LICENCIA**
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
-
-**⭐ Si este proyecto te ha sido útil como técnico de soporte, ¡no olvides darle una estrella!**
+**Solutions:**
+1. Close unnecessary programs before running
+2. Use `quick_assessment.ps1` for quick diagnostics
+3. Check that antivirus isn't scanning the scripts
 
 ---
 
 
-*Desarrollado por y para técnicos de soporte IT*
+## **SUPPORT AND HELP**
+
+
+### **For Support Technicians**
+- **GitHub Issues:** [Report problems or suggest improvements](../../issues)
+- **Documentation:** See example files in `logs_reports\`
+- **Community:** Share experiences in Issues
+
+
+### **Additional Resources**
+- **Report examples:** In the `logs_reports\` folder after running
+- **Detailed logs:** Each script generates error logs if something fails
+- **Error codes:** Check `ErrorHandler.ps1` file for details
+
+---
+
+## 📄 **LICENSE**
+
+This project is under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**⭐ If this project has been useful to you as a support technician, don't forget to give it a star!**
+
+---
+
+
+*Developed by and for IT support technicians*

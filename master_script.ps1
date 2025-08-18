@@ -1,36 +1,36 @@
 # ====================================================================
-# SCRIPT MAESTRO MULTIFUNCIONAL - CENTRO DE CONTROL PARA TÉCNICOS IT
+# MULTIFUNCTIONAL MASTER SCRIPT - CONTROL CENTER FOR IT TECHNICIANS
 # ====================================================================
 #
-# PROPÓSITO:
-# Este es el script principal que da acceso a todas las herramientas de diagnóstico
-# Funciona como un "centro de control" para técnicos de soporte
+# PURPOSE:
+# This is the main script that gives access to all diagnostic tools
+# It works as a "control center" for support technicians
 #
-# CARACTERÍSTICAS:
-# - Menú interactivo con todas las herramientas disponibles
-# - Verificación automática de archivos y dependencias
-# - Manejo inteligente de políticas de ejecución de Windows
-# - Organizadas por categorías para fácil navegación
+# FEATURES:
+# - Interactive menu with all available tools
+# - Automatic file and dependency checking
+# - Smart handling of Windows execution policies
+# - Organized by categories for easy navigation
 #
-# CÓMO USAR:
-# 1. Ejecutar este script desde PowerShell o usando ejecutar_master.bat
-# 2. Seleccionar la herramienta necesaria según el problema del cliente
-# 3. Los reportes se guardan automáticamente en logs_reports\
+# HOW TO USE:
+# 1. Run this script from PowerShell or using ejecutar_master.bat
+# 2. Select the needed tool according to the client's problem
+# 3. Reports are automatically saved in logs_reports\
 #
-# IDEAL PARA:
-# - Técnicos que prefieren menús interactivos
-# - Cuando no estás seguro qué herramienta usar
-# - Acceso centralizado a todas las funciones
+# GREAT FOR:
+# - Technicians who prefer interactive menus
+# - When you're not sure which tool to use
+# - Centralized access to all functions
 # ====================================================================
 
-# === MANEJO ROBUSTO DE POLÍTICAS DE EJECUCIÓN ===
-# Esta función maneja los problemas más comunes con políticas de PowerShell
-# Intenta múltiples métodos para permitir la ejecución de scripts
+# === ROBUST EXECUTION POLICY HANDLING ===
+# This function handles the most common problems with PowerShell policies
+# It tries multiple methods to allow script execution
 function Initialize-ExecutionPolicy {
-    Write-Host "Verificando políticas de ejecución..." -ForegroundColor Yellow
+    Write-Host "Checking execution policies..." -ForegroundColor Yellow
     
-    # Intentar configurar la política de ejecución con diferentes métodos
-    # Del más restrictivo al menos restrictivo
+    # Try to configure execution policy with different methods
+    # From most restrictive to least restrictive
     $methods = @(
         { Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction Stop },
         { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction Stop },
@@ -41,75 +41,75 @@ function Initialize-ExecutionPolicy {
     foreach ($method in $methods) {
         try {
             & $method
-            Write-Host "✓ Política de ejecución configurada correctamente" -ForegroundColor Green
+            Write-Host "✓ Execution policy configured correctly" -ForegroundColor Green
             $success = $true
             break
         } catch {
-            continue  # Intentar el siguiente método
+            continue  # Try the next method
         }
     }
     
-    # Si ningún método funcionó, mostrar ayuda detallada
+    # If no method worked, show detailed help
     if (-not $success) {
         Write-Host ""
-        Write-Host "⚠️  ADVERTENCIA: No se pudo configurar la política de ejecución" -ForegroundColor Red
-        Write-Host "Esto puede causar problemas al ejecutar los scripts." -ForegroundColor Yellow
+        Write-Host "⚠️  WARNING: Could not configure execution policy" -ForegroundColor Red
+        Write-Host "This may cause problems when running scripts." -ForegroundColor Yellow
         Write-Host ""
-        Write-Host "SOLUCIONES RECOMENDADAS:" -ForegroundColor Cyan
-        Write-Host "1. Ejecutar como Administrador:" -ForegroundColor White
-        Write-Host "   - Clic derecho en PowerShell → 'Ejecutar como administrador'" -ForegroundColor Gray
-        Write-Host "   - Navegar a esta carpeta y ejecutar: .\master_script.ps1" -ForegroundColor Gray
+        Write-Host "RECOMMENDED SOLUTIONS:" -ForegroundColor Cyan
+        Write-Host "1. Run as Administrator:" -ForegroundColor White
+        Write-Host "   - Right-click on PowerShell → 'Run as administrator'" -ForegroundColor Gray
+        Write-Host "   - Navigate to this folder and run: .\master_script.ps1" -ForegroundColor Gray
         Write-Host ""
-        Write-Host "2. Usar PowerShell Core (recomendado):" -ForegroundColor White
-        Write-Host "   - Descargar desde: https://github.com/PowerShell/PowerShell/releases" -ForegroundColor Gray
+        Write-Host "2. Use PowerShell Core (recommended):" -ForegroundColor White
+        Write-Host "   - Download from: https://github.com/PowerShell/PowerShell/releases" -ForegroundColor Gray
         Write-Host ""
-        Write-Host "3. Configurar política manualmente (como Admin):" -ForegroundColor White
+        Write-Host "3. Configure policy manually (as Admin):" -ForegroundColor White
         Write-Host "   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser" -ForegroundColor Gray
         Write-Host ""
-        Write-Host "4. Usar el archivo .bat incluido (método alternativo)" -ForegroundColor White
+        Write-Host "4. Use the included .bat file (alternative method)" -ForegroundColor White
         Write-Host ""
         
-        $continue = Read-Host "¿Desea continuar de todos modos? (s/n)"
-        if ($continue -notmatch '^[sS].*') {
-            Write-Host "Saliendo del script..." -ForegroundColor Yellow
+        $continue = Read-Host "Do you want to continue anyway? (y/n)"
+        if ($continue -notmatch '^[yY].*') {
+            Write-Host "Exiting script..." -ForegroundColor Yellow
             exit 1
         }
     }
 }
 
 # ====================================================================
-# CONFIGURACIÓN INICIAL Y VERIFICACIÓN DEL ENTORNO
+# INITIAL SETUP AND ENVIRONMENT VERIFICATION
 # ====================================================================
 
-# Detectar versión de PowerShell para mostrar información útil al técnico
+# Detect PowerShell version to show useful information to the technician
 $psVersion = $PSVersionTable.PSVersion.Major
-$psEdition = $PSVersionTable.PSEdition
+$psEditionInfo = $PSVersionTable.PSEdition
 
-Write-Host "Sistema detectado:" -ForegroundColor Cyan
-Write-Host "- PowerShell versión: $($PSVersionTable.PSVersion)" -ForegroundColor White
-Write-Host "- Edición: $psEdition" -ForegroundColor White
-Write-Host "- SO: $($PSVersionTable.OS -split "`n" | Select-Object -First 1)" -ForegroundColor White
+Write-Host "System detected:" -ForegroundColor Cyan
+Write-Host "- PowerShell version: $($PSVersionTable.PSVersion)" -ForegroundColor White
+Write-Host "- Edition: $psEditionInfo" -ForegroundColor White
+Write-Host "- OS: $($PSVersionTable.OS -split "`n" | Select-Object -First 1)" -ForegroundColor White
 
-# Inicializar políticas de ejecución
+# Initialize execution policies
 Initialize-ExecutionPolicy
 
-# Configurar soporte para caracteres especiales (acentos, ñ, etc.)
+# Configure support for special characters (accents, ñ, etc.)
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-# Definir rutas de trabajo
+# Define working paths
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
 $logPath = Join-Path -Path $scriptPath -ChildPath "logs_reports"
 
-# Crear carpeta de reportes si no existe
+# Create reports folder if it doesn't exist
 if (-not (Test-Path -Path $logPath)) {
     New-Item -ItemType Directory -Path $logPath -Force | Out-Null
 }
 
 # ====================================================================
-# FUNCIÓN: VERIFICAR QUE TODOS LOS SCRIPTS ESTÉN DISPONIBLES
+# FUNCTION: CHECK THAT ALL SCRIPTS ARE AVAILABLE
 # ====================================================================
-# Esta función verifica que todas las herramientas estén presentes
-# antes de mostrar el menú al técnico
+# This function verifies that all tools are present
+# before showing the menu to the technician
 
 function Test-ScriptExists {
     param($scriptName)
@@ -118,75 +118,75 @@ function Test-ScriptExists {
     if (Test-Path -Path $fullPath) {
         return $true
     } else {
-        Write-Host "ERROR: No se encuentra el script '$scriptName'" -ForegroundColor Red
-        Write-Host "Ruta buscada: $fullPath" -ForegroundColor Yellow
+        Write-Host "ERROR: Script '$scriptName' not found" -ForegroundColor Red
+        Write-Host "Path searched: $fullPath" -ForegroundColor Yellow
         return $false
     }
 }
 
-# Función para mostrar el menú
+# Function to show the menu
 function Show-Menu {
     Clear-Host
     Write-Host "========================================"
-    Write-Host "       Script Maestro Multifuncional    " -ForegroundColor Cyan
+    Write-Host "       Multifunctional Master Script    " -ForegroundColor Cyan
     Write-Host "========================================"
-    Write-Host "Sistema: $env:COMPUTERNAME | Usuario: $env:USERNAME"
-    Write-Host "Directorio actual: $scriptPath"
+    Write-Host "System: $env:COMPUTERNAME | User: $env:USERNAME"
+    Write-Host "Current directory: $scriptPath"
     Write-Host "========================================"
     Write-Host ""
-    Write-Host "PARTE 1 - DIAGNÓSTICOS Y MANTENIMIENTO BÁSICO" -ForegroundColor Green
-    Write-Host "1) Diagnóstico Simple (evaluación rápida)" -ForegroundColor White
-    Write-Host "2) Diagnóstico Completo (análisis exhaustivo)" -ForegroundColor White
-    Write-Host "3) Backups de Carpetas Críticas" -ForegroundColor White
-    Write-Host "4) Recuperación de Archivos Eliminados" -ForegroundColor White
-    Write-Host "5) Limpieza y Mantenimiento del Sistema" -ForegroundColor White
+    Write-Host "PART 1 - BASIC DIAGNOSTICS AND MAINTENANCE" -ForegroundColor Green
+    Write-Host "1) Simple Diagnosis (quick evaluation)" -ForegroundColor White
+    Write-Host "2) Complete Diagnosis (exhaustive analysis)" -ForegroundColor White
+    Write-Host "3) Critical Folders Backup" -ForegroundColor White
+    Write-Host "4) Deleted Files Recovery" -ForegroundColor White
+    Write-Host "5) System Cleanup and Maintenance" -ForegroundColor White
     Write-Host ""
-    Write-Host "PARTE 2 - DIAGNÓSTICOS ESPECÍFICOS" -ForegroundColor Yellow
-    Write-Host "6) Inventario de Hardware y Software" -ForegroundColor White
-    Write-Host "7) Validación de Configuración de Usuario" -ForegroundColor White
-    Write-Host "8) Escaneo de Seguridad Básico" -ForegroundColor White
-    Write-Host "9) Diagnóstico de Red" -ForegroundColor White
-    Write-Host "10) Diagnóstico de Rendimiento" -ForegroundColor White
+    Write-Host "PART 2 - SPECIFIC DIAGNOSTICS" -ForegroundColor Yellow
+    Write-Host "6) Hardware and Software Inventory" -ForegroundColor White
+    Write-Host "7) User Configuration Validation" -ForegroundColor White
+    Write-Host "8) Basic Security Scan" -ForegroundColor White
+    Write-Host "9) Network Diagnosis" -ForegroundColor White
+    Write-Host "10) Performance Diagnosis" -ForegroundColor White
     Write-Host ""
-    Write-Host "0) Salir" -ForegroundColor Red
+    Write-Host "0) Exit" -ForegroundColor Red
     Write-Host "========================================"
 }
 
-# Función para ejecutar tareas
+# Function to execute tasks
 function Execute-Task($choice) {
-    # Importar ErrorHandler antes de ejecutar cualquier script
+    # Import ErrorHandler before executing any script
     $errorHandlerPath = Join-Path -Path $scriptPath -ChildPath "ErrorHandler.ps1"
     if (Test-Path $errorHandlerPath) {
         . $errorHandlerPath
-        Write-Host "✓ ErrorHandler cargado correctamente" -ForegroundColor Green
+        Write-Host "✓ ErrorHandler loaded correctly" -ForegroundColor Green
     } else {
-        Write-Host "⚠️  Advertencia: ErrorHandler.ps1 no encontrado" -ForegroundColor Yellow
+        Write-Host "⚠️  Warning: ErrorHandler.ps1 not found" -ForegroundColor Yellow
     }
 
     switch ($choice) {
         1 { 
-            # Diagnóstico Simple
+            # Simple Diagnosis
             $script = "quick_assessment.ps1"
             if (Test-ScriptExists $script) {
-                Write-Host "Ejecutando Diagnóstico Simple..." -ForegroundColor Green
+                Write-Host "Running Simple Diagnosis..." -ForegroundColor Green
                 try {
                     . "$scriptPath\$script"
                 } catch {
-                    Write-Host "Error ejecutando $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
             }
         }
         2 { 
-            # Diagnóstico Completo
+            # Complete Diagnosis
             $script = "diagnostico_completo.ps1"
             if (Test-ScriptExists $script) {
-                Write-Host "Ejecutando Diagnóstico Completo..." -ForegroundColor Green
+                Write-Host "Running Complete Diagnosis..." -ForegroundColor Green
                 try {
                     . "$scriptPath\$script"
                 } catch {
-                    Write-Host "Error ejecutando $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
@@ -196,161 +196,161 @@ function Execute-Task($choice) {
             # Backups
             $script = "backups.ps1"
             if (Test-ScriptExists $script) {
-                Write-Host "Ejecutando Backup de Carpetas Críticas..." -ForegroundColor Green
+                Write-Host "Running Critical Folders Backup..." -ForegroundColor Green
                 try {
                     . "$scriptPath\$script"
                 } catch {
-                    Write-Host "Error ejecutando $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
             }
         }
         4 { 
-            # Recuperación de Archivos
+            # File Recovery
             $script = "recuperacion_archivos.ps1"
             if (Test-ScriptExists $script) {
-                Write-Host "Ejecutando Recuperación de Archivos..." -ForegroundColor Green
+                Write-Host "Running File Recovery..." -ForegroundColor Green
                 try {
                     . "$scriptPath\$script"
                 } catch {
-                    Write-Host "Error ejecutando $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
             }
         }
         5 { 
-            # Limpieza y Mantenimiento
+            # Cleanup and Maintenance
             $script = "limpieza_mantenimiento.ps1"
             if (Test-ScriptExists $script) {
-                Write-Host "Ejecutando Limpieza y Mantenimiento..." -ForegroundColor Green
+                Write-Host "Running Cleanup and Maintenance..." -ForegroundColor Green
                 try {
                     . "$scriptPath\$script"
                 } catch {
-                    Write-Host "Error ejecutando $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
             }
         }
         6 { 
-            # Inventario
+            # Inventory
             $script = "inventario_hw_sw.ps1"
             if (Test-ScriptExists $script) {
-                Write-Host "Ejecutando Inventario de Hardware y Software..." -ForegroundColor Green
+                Write-Host "Running Hardware and Software Inventory..." -ForegroundColor Green
                 try {
                     . "$scriptPath\$script"
                 } catch {
-                    Write-Host "Error ejecutando $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
             }
         }
         7 { 
-            # Validación de Usuario
+            # User Validation
             $script = "validacion_usuario.ps1"
             if (Test-ScriptExists $script) {
-                Write-Host "Ejecutando Validación de Usuario..." -ForegroundColor Green
+                Write-Host "Running User Validation..." -ForegroundColor Green
                 try {
                     . "$scriptPath\$script"
                 } catch {
-                    Write-Host "Error ejecutando $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
             }
         }
         8 { 
-            # Escaneo de Seguridad
+            # Security Scan
             $script = "escaneo_seguridad.ps1"
             if (Test-ScriptExists $script) {
-                Write-Host "Ejecutando Escaneo de Seguridad..." -ForegroundColor Green
+                Write-Host "Running Security Scan..." -ForegroundColor Green
                 try {
                     . "$scriptPath\$script"
                 } catch {
-                    Write-Host "Error ejecutando $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
             }
         }
         9 { 
-            # Diagnóstico de Red
+            # Network Diagnosis
             $script = "diagnostico_red.ps1"
             if (Test-ScriptExists $script) {
-                Write-Host "Ejecutando Diagnóstico de Red..." -ForegroundColor Green
+                Write-Host "Running Network Diagnosis..." -ForegroundColor Green
                 try {
                     . "$scriptPath\$script"
                 } catch {
-                    Write-Host "Error ejecutando $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
             }
         }
         10 { 
-            # Diagnóstico de Rendimiento
+            # Performance Diagnosis
             $script = "diagnostico_rendimiento.ps1"
             if (Test-ScriptExists $script) {
-                Write-Host "Ejecutando Diagnóstico de Rendimiento..." -ForegroundColor Green
+                Write-Host "Running Performance Diagnosis..." -ForegroundColor Green
                 try {
                     . "$scriptPath\$script"
                 } catch {
-                    Write-Host "Error ejecutando $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
             }
         }
         0 { 
-            Write-Host "Saliendo del script maestro..." -ForegroundColor Green
+            Write-Host "Exiting master script..." -ForegroundColor Green
             exit 
         }
         default { 
-            Write-Host "Opción inválida. Por favor intenta nuevamente." -ForegroundColor Red 
+            Write-Host "Invalid option. Please try again." -ForegroundColor Red 
             Start-Sleep -Seconds 2
         }
     }
 }
 
-# Función para mostrar mensaje cuando falta un script
+# Function to show message when a script is missing
 function Show-ScriptMissing($scriptName) {
     Write-Host ""
-    Write-Host "===================== ATENCIÓN =====================" -ForegroundColor Red
-    Write-Host "El script '$scriptName' no se encuentra en la carpeta actual." -ForegroundColor Yellow
+    Write-Host "===================== ATTENTION =====================" -ForegroundColor Red
+    Write-Host "The script '$scriptName' is not found in the current folder." -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "Para resolver este problema:" -ForegroundColor White
-    Write-Host "1. Asegúrate de que todos los scripts están en la misma carpeta:"
+    Write-Host "To solve this problem:" -ForegroundColor White
+    Write-Host "1. Make sure all scripts are in the same folder:"
     Write-Host "   $scriptPath"
-    Write-Host "2. Verifica que el nombre del archivo sea exactamente: $scriptName"
-    Write-Host "3. Si necesitas descargar los scripts, visita:"
+    Write-Host "2. Check that the file name is exactly: $scriptName"
+    Write-Host "3. If you need to download the scripts, visit:"
     Write-Host "   https://github.com/GinoK01/IT-Support-Scripts"
     Write-Host "=====================================================" -ForegroundColor Red
     Write-Host ""
-    Write-Host "Presiona cualquier tecla para continuar..." -ForegroundColor Cyan
+    Write-Host "Press any key to continue..." -ForegroundColor Cyan
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }
 
 # Main loop
 while ($true) {
     Show-Menu
-    Write-Host "Por favor selecciona una opción [0-10]: " -ForegroundColor Cyan -NoNewline
+    Write-Host "Please select an option [0-10]: " -ForegroundColor Cyan -NoNewline
     $choice = Read-Host
     
-    # Validar entrada
+    # Validate input
     if ($choice -match '^(0|[1-9]|10)$') {
         Execute-Task $choice
         
-        # Pausa para ver los resultados antes de volver al menú (excepto al salir)
+        # Pause to see results before returning to menu (except when exiting)
         if ($choice -ne "0") {
             Write-Host ""
-            Write-Host "Presiona cualquier tecla para volver al menú principal..." -ForegroundColor Cyan
+            Write-Host "Press any key to return to main menu..." -ForegroundColor Cyan
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
     } else {
-        Write-Host "Entrada inválida. Por favor introduce un número del 0 al 10." -ForegroundColor Red
+        Write-Host "Invalid input. Please enter a number from 0 to 10." -ForegroundColor Red
         Start-Sleep -Seconds 2
     }
 }

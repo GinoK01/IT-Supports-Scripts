@@ -1,49 +1,49 @@
 # ====================================================================
-# PLANTILLA HTML UNIFICADA PARA REPORTES DE IT SUPPORT
+# UNIFIED HTML TEMPLATE FOR IT SUPPORT REPORTS
 # ====================================================================
 #
-# PROPÓSITO:
-# Este archivo contiene las funciones que generan reportes HTML profesionales
-# Los técnicos pueden usar estos reportes para:
-# - Mostrar resultados a clientes de forma visual
-# - Documentar el estado del sistema antes/después del servicio
-# - Enviar reportes técnicos por email
+# PURPOSE:
+# This file contains functions that generate professional HTML reports
+# Technicians can use these reports for:
+# - Show results to clients visually
+# - Document system status before/after service
+# - Send technical reports by email
 #
-# FUNCIONES PRINCIPALES:
-# - Get-UnifiedHTMLTemplate: Crea la estructura base del reporte
-# - Get-UnifiedHTMLFooter: Cierra el reporte y agrega scripts
-# - Get-ModuleStatusClass: Asigna colores según el estado (bueno/advertencia/crítico)
+# MAIN FUNCTIONS:
+# - Get-UnifiedHTMLTemplate: Creates the base structure of the report
+# - Get-UnifiedHTMLFooter: Closes the report and adds scripts
+# - Get-ModuleStatusClass: Assigns colors according to status (good/warning/critical)
 #
-# NOTA PARA TÉCNICOS:
-# Los reportes se guardan automáticamente en la carpeta "logs_reports"
-# Son compatibles con cualquier navegador web y se pueden imprimir
+# NOTE FOR TECHNICIANS:
+# Reports are automatically saved in the "logs_reports" folder
+# They are compatible with any web browser and can be printed
 # ====================================================================
 
 function Get-UnifiedHTMLTemplate {
-    # Esta función crea la estructura inicial del reporte HTML
+    # This function creates the initial structure of the HTML report
     param(
-        [string]$Title,                    # Título del reporte (ej: "Diagnóstico de Red")
-        [string]$ComputerName = $env:COMPUTERNAME,  # Nombre del equipo analizado
-        [string]$UserName = $env:USERNAME,          # Usuario actual
-        [string]$DateTime = (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'),  # Fecha y hora del reporte
-        [bool]$IncludeSummary = $true      # Si incluir el resumen visual con contadores
+        [string]$Title,                    # Report title (e.g., "Network Diagnosis")
+        [string]$ComputerName = $env:COMPUTERNAME,  # Name of the analyzed computer
+        [string]$UserName = $env:USERNAME,          # Current user
+        [string]$DateTime = (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'),  # Report date and time
+        [bool]$IncludeSummary = $true      # Whether to include the visual summary with counters
     )
 
-    # Crear la sección de resumen visual (cajas de colores con contadores)
-    # Esto ayuda al técnico y al cliente a ver rápidamente el estado general
+    # Create the visual summary section (colored boxes with counters)
+    # This helps the technician and client quickly see the general status
     $summarySection = if ($IncludeSummary) {
         @'
         <div class="summary">
             <div class="summary-box good">
-                <h3>Todo en Orden</h3>
+                <h3>All Good</h3>
                 <p id="goodCount">-</p>
             </div>
             <div class="summary-box warning">
-                <h3>Advertencias</h3>
+                <h3>Warnings</h3>
                 <p id="warningCount">-</p>
             </div>
             <div class="summary-box critical">
-                <h3>Problemas Críticos</h3>
+                <h3>Critical Problems</h3>
                 <p id="criticalCount">-</p>
             </div>
         </div>
@@ -52,7 +52,7 @@ function Get-UnifiedHTMLTemplate {
 
     $headerHtml = @"
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <title>$Title - $ComputerName</title>
     <meta charset="UTF-8">
@@ -315,8 +315,8 @@ function Get-UnifiedHTMLTemplate {
     <div class="container">
         <div class="header">
             <h1>$Title</h1>
-            <p><strong>Equipo:</strong> $ComputerName | <strong>Usuario:</strong> $UserName</p>
-            <p><strong>Fecha:</strong> $DateTime</p>
+            <p><strong>Computer:</strong> $ComputerName | <strong>User:</strong> $UserName</p>
+            <p><strong>Date:</strong> $DateTime</p>
         </div>
         
         $summarySection
@@ -333,15 +333,15 @@ function Get-UnifiedHTMLFooter {
 
     $script = if ($IncludeCountingScript) {
         if ($ModuleName) {
-            # Script para conteo individual por módulo - mejorado para ser más específico
+            # Script for individual counting by module - improved to be more specific
             @"
         <script>
-            // Contar elementos por estado para el módulo específico: $ModuleName
+            // Count elements by status for specific module: $ModuleName
             window.addEventListener('load', function() {
                 const modulePrefix = '$ModuleName';
                 
-                // Contar solo elementos dentro de secciones diagnostic-section
-                // Esto evita contar elementos de otros módulos o del resumen de errores
+                // Count only elements within diagnostic-section sections
+                // This avoids counting elements from other modules or error summary
                 const diagnosticSections = document.querySelectorAll('.diagnostic-section');
                 let goodItems = 0;
                 let warningItems = 0;
@@ -401,8 +401,8 @@ function Get-UnifiedHTMLFooter {
 
     return @"
         <div class="footer-info">
-            <p>Reporte generado automáticamente por IT Support Scripts</p>
-            <p>Fecha de generación: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</p>
+            <p>Report automatically generated by IT Support Scripts</p>
+            <p>Generation date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</p>
         </div>
         $script
     </div>

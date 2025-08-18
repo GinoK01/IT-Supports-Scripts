@@ -1,48 +1,48 @@
 # ====================================================================
-# DIAGNÓSTICO RÁPIDO DE SISTEMA - SCRIPT PARA TÉCNICOS DE SOPORTE
+# QUICK SYSTEM DIAGNOSIS - SCRIPT FOR SUPPORT TECHNICIANS
 # ====================================================================
 # 
-# PROPÓSITO:
-# Este script realiza una evaluación rápida (2-3 minutos) del estado del sistema
-# Ideal para una primera revisión durante visitas técnicas o llamadas de soporte
+# PURPOSE:
+# This script performs a quick evaluation (2-3 minutes) of the system status
+# Perfect for a first review during technical visits or support calls
 #
-# QUÉ HACE:
-# - Verifica el uso de CPU y memoria
-# - Comprueba la conectividad de red
-# - Detecta problemas básicos del sistema
-# - Genera un reporte HTML fácil de leer
+# WHAT IT DOES:
+# - Checks CPU and memory usage
+# - Verifies network connectivity
+# - Detects basic system problems
+# - Generates an easy-to-read HTML report
 #
-# CUÁNDO USARLO:
-# - Primera evaluación de un equipo con problemas
-# - Antes de hacer cambios importantes
-# - Para documentar el estado inicial del sistema
+# WHEN TO USE IT:
+# - First evaluation of a computer with problems
+# - Before making important changes
+# - To document the initial system status
 # ====================================================================
 
-# Configuración inicial del script
-# Permitir la ejecución de scripts PowerShell (necesario para que funcione)
+# Initial script configuration
+# Allow PowerShell script execution (necessary for it to work)
 try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction SilentlyContinue
 } catch {
-    # Si falla, continuar - algunos sistemas no permiten cambiar la política
+    # If it fails, continue - some systems don't allow changing the policy
 }
 
-# Configurar soporte para caracteres especiales (acentos, ñ, etc.)
+# Configure support for special characters (accents, ñ, etc.)
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-# Crear la carpeta donde se guardan los reportes si no existe
+# Create the folder where reports are saved if it doesn't exist
 $PSScriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $logsPath = Join-Path -Path $PSScriptRoot -ChildPath "logs_reports"
 if (-not (Test-Path $logsPath)) {
     New-Item -ItemType Directory -Path $logsPath -Force | Out-Null
 }
 
-# Cargar módulos de soporte (funciones adicionales para manejo de errores y reportes)
+# Load support modules (additional functions for error handling and reports)
 $errorHandlerPath = Join-Path -Path $PSScriptRoot -ChildPath "ErrorHandler.ps1"
 if (Test-Path $errorHandlerPath) {
     . $errorHandlerPath
 } else {
-    Write-Warning "No se encontró el módulo ErrorHandler.ps1. Continuando sin manejo avanzado de errores."
-    # Crear funciones básicas para que el script no falle
+    Write-Warning "ErrorHandler.ps1 module not found. Continuing without advanced error handling."
+    # Create basic functions so the script doesn't fail
     function Add-ITSupportError { param($Seccion, $Mensaje) }
     function Clear-ITSupportErrors { }
     function Get-ErrorSummaryHTML { param($IncludeCSS) return "" }
@@ -50,13 +50,13 @@ if (Test-Path $errorHandlerPath) {
     function Invoke-SafeExecution { param($Seccion, $ScriptBlock, $DefaultValue) try { & $ScriptBlock } catch { $DefaultValue } }
 }
 
-# Cargar plantilla para generar reportes HTML profesionales
+# Load template to generate professional HTML reports
 $htmlTemplatePath = Join-Path -Path $PSScriptRoot -ChildPath "HTMLTemplate.ps1"
 if (Test-Path $htmlTemplatePath) {
     . $htmlTemplatePath
 } else {
-    Write-Warning "No se encontró HTMLTemplate.ps1. Usando formato básico."
-    # Funciones básicas para generar HTML si no está disponible la plantilla
+    Write-Warning "HTMLTemplate.ps1 not found. Using basic format."
+    # Basic functions to generate HTML if template is not available
     function Get-UnifiedHTMLTemplate { 
         param($Title, $ShowSummary)
         return "<html><head><title>$Title</title></head><body><h1>$Title</h1>"
@@ -67,27 +67,27 @@ if (Test-Path $htmlTemplatePath) {
     }
 }
 
-# Limpiar errores de ejecuciones anteriores
+# Clear errors from previous executions
 Clear-ITSupportErrors
 
 # ====================================================================
-# INICIO DEL DIAGNÓSTICO RÁPIDO
+# START OF QUICK DIAGNOSIS
 # ====================================================================
 
-# Crear nombre único para el archivo de reporte (incluye fecha y hora)
+# Create unique name for report file (includes date and time)
 $timestamp = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'
 $summaryFile = Join-Path -Path $logsPath -ChildPath "diagnostico_rapido_$timestamp.html"
 
-Write-Host "Iniciando diagnóstico rápido del sistema..." -ForegroundColor Green
-Write-Host "El reporte se guardará en: $summaryFile" -ForegroundColor Gray
+Write-Host "Starting quick system diagnosis..." -ForegroundColor Green
+Write-Host "Report will be saved in: $summaryFile" -ForegroundColor Gray
 
 # ====================================================================
-# 1. VERIFICACIÓN DE USO DE CPU (PROCESADOR)
+# 1. CPU (PROCESSOR) USAGE VERIFICATION
 # ====================================================================
-# Esto nos dice qué tanto está trabajando el procesador
-# Valores normales: 0-30% (bueno), 30-70% (aceptable), 70%+ (problema)
+# This tells us how hard the processor is working
+# Normal values: 0-30% (good), 30-70% (acceptable), 70%+ (problem)
 
-Write-Host "`n[1/4] Verificando uso del procesador..." -ForegroundColor Yellow
+Write-Host "`n[1/4] Checking processor usage..." -ForegroundColor Yellow
 
 $cpuLoad = 0
 try {

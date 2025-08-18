@@ -1,7 +1,7 @@
-# Módulo de Manejo de Errores para Scripts de IT Support
-# Este módulo proporciona funciones comunes para capturar y mostrar errores
+# Error Management Module for IT Support Scripts
+# This module provides common functions to capture and display errors
 
-# Inicializar colección global de errores si no existe
+# Initialize global error collection if it doesn't exist
 if (-not $Global:ITSupportErrors) { 
     $Global:ITSupportErrors = New-Object System.Collections.ArrayList 
 }
@@ -9,19 +9,19 @@ if (-not $Global:ITSupportErrors) {
 function Add-ITSupportError {
     <#
     .SYNOPSIS
-    Agrega un error a la colección global de errores
+    Adds an error to the global error collection
     
     .PARAMETER Seccion
-    La sección o módulo donde ocurrió el error
+    The section or module where the error occurred
     
     .PARAMETER ErrorRecord
-    El objeto ErrorRecord de PowerShell
+    The PowerShell ErrorRecord object
     
     .PARAMETER Mensaje
-    Mensaje personalizado del error (opcional)
+    Custom error message (optional)
     
     .PARAMETER Severidad
-    Nivel de severidad: Info, Warning, Error, Critical
+    Severity level: Info, Warning, Error, Critical
     #>
     param(
         [string]$Seccion,
@@ -45,32 +45,32 @@ function Add-ITSupportError {
         
         $null = $Global:ITSupportErrors.Add($errorObj)
         
-        # Escribir también al log de errores si está en modo verbose
+        # Also write to error log if in verbose mode
         if ($VerbosePreference -eq "Continue") {
             Write-Verbose "[$Severidad] $Seccion`: $($errorObj.Mensaje)"
         }
     } catch {
-        # Si falla el registro del error, al menos escribirlo a la consola
-        Write-Warning "Error registrando error en sección '$Seccion': $_"
+        # If error registration fails, at least write it to console
+        Write-Warning "Error registering error in section '$Seccion': $_"
     }
 }
 
 function Invoke-SafeExecution {
     <#
     .SYNOPSIS
-    Ejecuta un scriptblock de forma segura, capturando errores automáticamente
+    Executes a scriptblock safely, automatically capturing errors
     
     .PARAMETER Seccion
-    La sección donde se ejecuta el código
+    The section where the code is executed
     
     .PARAMETER ScriptBlock
-    El código a ejecutar
+    The code to execute
     
     .PARAMETER DefaultValue
-    Valor a retornar si hay error
+    Value to return if there's an error
     
     .PARAMETER SuppressErrors
-    Si se deben suprimir los errores (no mostrarlos en consola)
+    Whether to suppress errors (not show them in console)
     #>
     param(
         [string]$Seccion,
@@ -85,7 +85,7 @@ function Invoke-SafeExecution {
         Add-ITSupportError -Seccion $Seccion -ErrorRecord $_
         
         if (-not $SuppressErrors) {
-            Write-Warning "Error en sección '$Seccion': $($_.Exception.Message)"
+            Write-Warning "Error in section '$Seccion': $($_.Exception.Message)"
         }
         
         return $DefaultValue
@@ -95,10 +95,10 @@ function Invoke-SafeExecution {
 function Get-ErrorSummaryHTML {
     <#
     .SYNOPSIS
-    Genera HTML con el resumen de errores detectados
+    Generates HTML with the summary of detected errors
     
     .PARAMETER IncludeCSS
-    Si incluir estilos CSS en el HTML
+    Whether to include CSS styles in the HTML
     #>
     param(
         [switch]$IncludeCSS
@@ -148,11 +148,11 @@ function Get-ErrorSummaryHTML {
             z-index: 10;
             font-weight: bold;
         }
-        .error-table th:nth-child(1) { width: 15%; } /* Hora */
-        .error-table th:nth-child(2) { width: 20%; } /* Sección */
-        .error-table th:nth-child(3) { width: 10%; } /* Severidad */
-        .error-table th:nth-child(4) { width: 40%; } /* Mensaje */
-        .error-table th:nth-child(5) { width: 15%; } /* Categoría */
+        .error-table th:nth-child(1) { width: 15%; } /* Time */
+        .error-table th:nth-child(2) { width: 20%; } /* Section */
+        .error-table th:nth-child(3) { width: 10%; } /* Severity */
+        .error-table th:nth-child(4) { width: 40%; } /* Message */
+        .error-table th:nth-child(5) { width: 15%; } /* Category */
         .error-table td {
             overflow: hidden;
             text-overflow: ellipsis;
@@ -180,20 +180,20 @@ function Get-ErrorSummaryHTML {
     if ($Global:ITSupportErrors.Count -eq 0) {
         return $css + @'
         <div class="error-section none">
-            <h2>✅ Estado de Errores</h2>
-            <p><strong>No se detectaron errores durante la ejecución.</strong></p>
+            <h2>✅ Error Status</h2>
+            <p><strong>No errors detected during execution.</strong></p>
         </div>
 '@
     }
     
-    # Agrupar errores por severidad
+    # Group errors by severity
     $errorsBySeverity = $Global:ITSupportErrors | Group-Object -Property Severidad
     $criticalCount = ($errorsBySeverity | Where-Object { $_.Name -eq "Critical" } | Select-Object -ExpandProperty Count) -or 0
     $errorCount = ($errorsBySeverity | Where-Object { $_.Name -eq "Error" } | Select-Object -ExpandProperty Count) -or 0
     $warningCount = ($errorsBySeverity | Where-Object { $_.Name -eq "Warning" } | Select-Object -ExpandProperty Count) -or 0
     $infoCount = ($errorsBySeverity | Where-Object { $_.Name -eq "Info" } | Select-Object -ExpandProperty Count) -or 0
     
-    # Asegurar que sean números enteros
+    # Ensure they are integer numbers
     $criticalCount = [int]$criticalCount
     $errorCount = [int]$errorCount  
     $warningCount = [int]$warningCount
@@ -206,25 +206,25 @@ function Get-ErrorSummaryHTML {
     
     $html = $css + @"
         <div class="error-section $sectionClass">
-            <h2>⚠️ Errores y Advertencias Detectados</h2>
-            <p><strong>Total de incidencias: $($Global:ITSupportErrors.Count)</strong></p>
+            <h2>⚠️ Errors and Warnings Detected</h2>
+            <p><strong>Total incidents: $($Global:ITSupportErrors.Count)</strong></p>
             <ul>
-                <li>Críticos: <strong>$criticalCount</strong></li>
-                <li>Errores: <strong>$errorCount</strong></li>
-                <li>Advertencias: <strong>$warningCount</strong></li>
-                <li>Informativos: <strong>$infoCount</strong></li>
+                <li>Critical: <strong>$criticalCount</strong></li>
+                <li>Errors: <strong>$errorCount</strong></li>
+                <li>Warnings: <strong>$warningCount</strong></li>
+                <li>Informational: <strong>$infoCount</strong></li>
             </ul>
             
-            <h3>Detalle de Incidencias</h3>
+            <h3>Incident Details</h3>
             <div class="error-table-container">
                 <table class="error-table">
                     <thead>
                         <tr>
-                            <th>Hora</th>
-                            <th>Sección</th>
-                            <th>Severidad</th>
-                            <th>Mensaje</th>
-                            <th>Categoría</th>
+                            <th>Time</th>
+                            <th>Section</th>
+                            <th>Severity</th>
+                            <th>Message</th>
+                            <th>Category</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -233,7 +233,7 @@ function Get-ErrorSummaryHTML {
     foreach ($error in $Global:ITSupportErrors | Sort-Object Timestamp) {
         $encodedSeccion = [System.Web.HttpUtility]::HtmlEncode($error.Seccion)
         $encodedMensaje = [System.Web.HttpUtility]::HtmlEncode($error.Mensaje)
-        # Truncar mensaje si es muy largo para la vista inicial
+        # Truncate message if too long for initial view
         $displayMensaje = if ($encodedMensaje.Length -gt 100) {
             $encodedMensaje.Substring(0, 97) + "..."
         } else {
@@ -264,7 +264,7 @@ function Get-ErrorSummaryHTML {
 function Clear-ITSupportErrors {
     <#
     .SYNOPSIS
-    Limpia la colección de errores
+    Clears the error collection
     #>
     if ($Global:ITSupportErrors) {
         $Global:ITSupportErrors.Clear()
@@ -274,35 +274,35 @@ function Clear-ITSupportErrors {
 function Export-ErrorLog {
     <#
     .SYNOPSIS
-    Exporta los errores a un archivo de log
+    Exports errors to a log file
     
     .PARAMETER Path
-    Ruta del archivo de log
+    Log file path
     #>
     param(
         [string]$Path
     )
     
     if ($Global:ITSupportErrors.Count -eq 0) {
-        "No hay errores registrados." | Out-File -FilePath $Path -Encoding UTF8
+        "No errors recorded." | Out-File -FilePath $Path -Encoding UTF8
         return
     }
     
     $logContent = @()
-    $logContent += "=== LOG DE ERRORES IT SUPPORT ==="
-    $logContent += "Generado: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-    $logContent += "Total de errores: $($Global:ITSupportErrors.Count)"
+    $logContent += "=== IT SUPPORT ERROR LOG ==="
+    $logContent += "Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    $logContent += "Total errors: $($Global:ITSupportErrors.Count)"
     $logContent += ""
     
     foreach ($error in $Global:ITSupportErrors | Sort-Object Timestamp) {
         $logContent += "[$($error.Timestamp.ToString('yyyy-MM-dd HH:mm:ss'))] [$($error.Severidad)] $($error.Seccion)"
-        $logContent += "  Mensaje: $($error.Mensaje)"
-        $logContent += "  Categoría: $($error.Categoria)"
+        $logContent += "  Message: $($error.Mensaje)"
+        $logContent += "  Category: $($error.Categoria)"
         if ($error.Objetivo) {
-            $logContent += "  Objetivo: $($error.Objetivo)"
+            $logContent += "  Target: $($error.Objetivo)"
         }
         if ($error.LineaError -gt 0) {
-            $logContent += "  Línea: $($error.LineaError)"
+            $logContent += "  Line: $($error.LineaError)"
         }
         $logContent += ""
     }
@@ -310,4 +310,4 @@ function Export-ErrorLog {
     $logContent | Out-File -FilePath $Path -Encoding UTF8
 }
 
-# Las funciones están disponibles automáticamente cuando se incluye el script con . (dot source)
+# Functions are automatically available when the script is included with . (dot source)
