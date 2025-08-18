@@ -76,7 +76,18 @@ function Initialize-ExecutionPolicy {
         }
     }
 }
-
+function Test-ScriptExists {
+    param($scriptName)
+    
+    $fullPath = Join-Path -Path $scriptPath -ChildPath $scriptName
+    if (Test-Path -Path $fullPath) {
+        return $true
+    } else {
+        Write-Host "ERROR: Script '$scriptName' not found" -ForegroundColor Red
+        Write-Host "Path searched: $fullPath" -ForegroundColor Yellow
+        return $false
+    }
+}
 # ====================================================================
 # INITIAL SETUP AND ENVIRONMENT VERIFICATION
 # ====================================================================
