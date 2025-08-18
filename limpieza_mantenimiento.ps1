@@ -1,4 +1,4 @@
-# Intentar configurar la política de ejecución (silenciando errores si falla)
+# Try to configure execution policy (silencing errors if it fails)
 try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction SilentlyContinue
 } catch {
@@ -113,7 +113,7 @@ function Clear-UserTempFiles {
         if (Test-Path $tempPath) {
             $sizeBefore = Get-FolderSize -Path $tempPath
             
-            $result = Invoke-SafeExecution -Seccion "Limpieza-TempUsuario" -DefaultValue $null -ScriptBlock {
+            $result = Invoke-SafeExecution -Section "Limpieza-TempUsuario" -DefaultValue $null -ScriptBlock {
                 Get-ChildItem -Path $tempPath -Force -ErrorAction SilentlyContinue | 
                 ForEach-Object {
                     try {
@@ -164,7 +164,7 @@ function Clear-SystemTempFiles {
             # Solo archivos más antiguos de 1 día para Prefetch
             $daysOld = if ($tempPath -like "*Prefetch*") { 1 } else { 0 }
             
-            $result = Invoke-SafeExecution -Seccion "Limpieza-TempSistema" -DefaultValue $null -ScriptBlock {
+            $result = Invoke-SafeExecution -Section "Limpieza-TempSistema" -DefaultValue $null -ScriptBlock {
                 $cutoffDate = (Get-Date).AddDays(-$daysOld)
                 Get-ChildItem -Path $tempPath -Force -ErrorAction SilentlyContinue | 
                 Where-Object { $_.LastWriteTime -lt $cutoffDate } |
@@ -201,7 +201,7 @@ function Clear-SystemTempFiles {
 function Clear-RecycleBin {
     Write-Host "🗑️ Vaciando papelera de reciclaje..." -ForegroundColor Cyan
     
-    $result = Invoke-SafeExecution -Seccion "Limpieza-PapeleraReciclaje" -DefaultValue $null -ScriptBlock {
+    $result = Invoke-SafeExecution -Section "Limpieza-PapeleraReciclaje" -DefaultValue $null -ScriptBlock {
         # Obtener tamaño antes
         $recycleBinSize = 0
         try {
@@ -253,7 +253,7 @@ function Clear-SystemLogs {
         if (Test-Path $logPath) {
             $sizeBefore = Get-FolderSize -Path $logPath
             
-            Invoke-SafeExecution -Seccion "Limpieza-LogsSistema" -DefaultValue $null -ScriptBlock {
+            Invoke-SafeExecution -Section "Limpieza-LogsSistema" -DefaultValue $null -ScriptBlock {
                 # Solo eliminar archivos más antiguos de 7 días
                 $cutoffDate = (Get-Date).AddDays(-7)
                 Get-ChildItem -Path $logPath -Recurse -File -ErrorAction SilentlyContinue | 
@@ -307,7 +307,7 @@ function Clear-WindowsCache {
                 (Get-Item $cachePath).Length
             }
             
-            Invoke-SafeExecution -Seccion "Limpieza-CacheWindows" -DefaultValue $null -ScriptBlock {
+            Invoke-SafeExecution -Section "Limpieza-CacheWindows" -DefaultValue $null -ScriptBlock {
                 if ((Get-Item $cachePath) -is [System.IO.DirectoryInfo]) {
                     Get-ChildItem -Path $cachePath -Force -ErrorAction SilentlyContinue | 
                     ForEach-Object {
@@ -358,8 +358,8 @@ function Clear-WindowsCache {
 function Invoke-DiskCleanup {
     Write-Host "💿 Ejecutando limpieza de disco del sistema..." -ForegroundColor Cyan
     
-    $result = Invoke-SafeExecution -Seccion "Limpieza-DiskCleanup" -DefaultValue $null -ScriptBlock {
-        # Crear archivo de configuración para cleanmgr
+    $result = Invoke-SafeExecution -Section "Limpieza-DiskCleanup" -DefaultValue $null -ScriptBlock {
+        # Create configuration file for cleanmgr
         $sageset = "StateFlags0001=2"
         $cleanupItems = @(
             "Active Setup Temp Folders",
@@ -396,7 +396,7 @@ function Invoke-DiskCleanup {
             }
         }
         
-        # Ejecutar cleanmgr con configuración automática
+        # Run cleanmgr with automatic configuration
         Start-Process -FilePath "cleanmgr.exe" -ArgumentList "/sagerun:1" -WindowStyle Hidden -Wait -ErrorAction SilentlyContinue
         
         return "Ejecutado"
@@ -410,7 +410,7 @@ function Invoke-DiskCleanup {
     }
 }
 
-# Obtener información del disco antes de la limpieza
+# Get disk information before cleanup
 $diskInfo = Get-WmiObject -Class Win32_LogicalDisk -Filter "DriveType=3" | 
             Select-Object DeviceID, 
                          @{Name="SizeGB";Expression={[math]::Round($_.Size/1GB, 2)}},
@@ -433,7 +433,7 @@ $systemLogsResults = Clear-SystemLogs
 $windowsCacheResults = Clear-WindowsCache
 $diskCleanupResult = Invoke-DiskCleanup
 
-# Obtener información del disco después de la limpieza
+# Get disk information after cleanup
 $diskInfoAfter = Get-WmiObject -Class Win32_LogicalDisk -Filter "DriveType=3" | 
                  Select-Object DeviceID, 
                               @{Name="SizeGB";Expression={[math]::Round($_.Size/1GB, 2)}},

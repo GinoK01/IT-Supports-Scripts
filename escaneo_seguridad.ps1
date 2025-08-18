@@ -1,4 +1,4 @@
-# Intentar configurar la política de ejecución (silenciando errores si falla)
+# Try to configure execution policy (silencing errors if it fails)
 try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction SilentlyContinue
 } catch {
@@ -62,7 +62,7 @@ function Get-DefenderStatus {
     Write-Host "Verificando estado de Windows Defender..." -ForegroundColor Yellow
     
     # Método 1: Get-MpComputerStatus (Windows 8+)
-    $defenderStatus = Invoke-SafeExecution -Seccion "Windows Defender Primary" -ScriptBlock {
+    $defenderStatus = Invoke-SafeExecution -Section "Windows Defender Primary" -ScriptBlock {
         Get-MpComputerStatus -ErrorAction Stop
     } -DefaultValue $null
     
@@ -82,7 +82,7 @@ function Get-DefenderStatus {
     }
     
     # Método 2: Verificar servicio de Windows Defender
-    $defenderService = Invoke-SafeExecution -Seccion "Windows Defender Service" -ScriptBlock {
+    $defenderService = Invoke-SafeExecution -Section "Windows Defender Service" -ScriptBlock {
         Get-Service -Name "WinDefend" -ErrorAction Stop
     } -DefaultValue $null
     
@@ -97,7 +97,7 @@ function Get-DefenderStatus {
     }
     
     # Método 3: Verificar procesos de antivirus
-    $antivirusProcesses = Invoke-SafeExecution -Seccion "Antivirus Processes" -ScriptBlock {
+    $antivirusProcesses = Invoke-SafeExecution -Section "Antivirus Processes" -ScriptBlock {
         $processes = Get-Process -ErrorAction Stop | Where-Object { 
             $_.ProcessName -match "(MsMpEng|NisSrv|avp|avgnt|avguard|avastsvc|mbamservice|mcshield)" 
         }
@@ -114,7 +114,7 @@ function Get-DefenderStatus {
     }
     
     # Método 4: Verificar mediante registro
-    $registryCheck = Invoke-SafeExecution -Seccion "Windows Defender Registry" -ScriptBlock {
+    $registryCheck = Invoke-SafeExecution -Section "Windows Defender Registry" -ScriptBlock {
         $defenderKey = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows Defender" -ErrorAction Stop
         return $defenderKey
     } -DefaultValue $null
@@ -138,10 +138,10 @@ function Get-DefenderStatus {
 
 # Función para obtener estado del firewall con múltiples métodos
 function Get-FirewallStatus {
-    Write-Host "Verificando configuración del firewall..." -ForegroundColor Yellow
+    Write-Host "Checking firewall configuration..." -ForegroundColor Yellow
     
     # Método 1: Get-NetFirewallProfile (Windows 8+)
-    $firewallProfiles = Invoke-SafeExecution -Seccion "Firewall Profiles" -ScriptBlock {
+    $firewallProfiles = Invoke-SafeExecution -Section "Firewall Profiles" -ScriptBlock {
         Get-NetFirewallProfile -ErrorAction Stop
     } -DefaultValue $null
     
@@ -154,7 +154,7 @@ function Get-FirewallStatus {
     }
     
     # Método 2: netsh advfirewall (compatible con versiones anteriores)
-    $netshResult = Invoke-SafeExecution -Seccion "Firewall Netsh" -ScriptBlock {
+    $netshResult = Invoke-SafeExecution -Section "Firewall Netsh" -ScriptBlock {
         Write-Host "    Ejecutando netsh advfirewall..." -ForegroundColor Gray
         $output = & netsh advfirewall show allprofiles state 2>$null
         Write-Host "    Código de salida netsh: $LASTEXITCODE" -ForegroundColor Gray
@@ -210,7 +210,7 @@ function Get-FirewallStatus {
     }
     
     # Método 2b: netsh advfirewall alternativo (formato diferente)
-    $netshResult2 = Invoke-SafeExecution -Seccion "Firewall Netsh Alternative" -ScriptBlock {
+    $netshResult2 = Invoke-SafeExecution -Section "Firewall Netsh Alternative" -ScriptBlock {
         Write-Host "    Probando netsh con formato alternativo..." -ForegroundColor Gray
         $profiles = @()
         
@@ -256,7 +256,7 @@ function Get-FirewallStatus {
     }
     
     # Método 3: Verificar servicio de firewall
-    $firewallService = Invoke-SafeExecution -Seccion "Firewall Service" -ScriptBlock {
+    $firewallService = Invoke-SafeExecution -Section "Firewall Service" -ScriptBlock {
         Get-Service -Name "MpsSvc" -ErrorAction Stop
     } -DefaultValue $null
     
@@ -272,7 +272,7 @@ function Get-FirewallStatus {
     return @{
         Method = "None"
         Available = $false
-        Error = "No se pudo obtener información del firewall"
+        Error = "Could not get firewall information"
     }
 }
 
@@ -280,7 +280,7 @@ function Get-FirewallStatus {
 function Get-SecurityUpdates {
     Write-Host "Verificando actualizaciones de seguridad..." -ForegroundColor Yellow
     
-    $updates = Invoke-SafeExecution -Seccion "Security Updates" -ScriptBlock {
+    $updates = Invoke-SafeExecution -Section "Security Updates" -ScriptBlock {
         # Verificar últimas actualizaciones instaladas
         $hotfixes = Get-HotFix -ErrorAction Stop | 
                    Where-Object { $_.Description -match "Security|Update" } |
@@ -318,7 +318,7 @@ if ($defenderStatus.Available) {
     
     # Registrar problema crítico si la protección está inactiva
     if (-not $defenderStatus.RealTimeProtectionEnabled) {
-        Add-ITSupportError -Seccion "Windows Defender" -Mensaje "La protección en tiempo real está desactivada" -Severidad "Critical"
+        Add-ITSupportError -Section "Windows Defender" -Message "La protección en tiempo real está desactivada" -Severity "Critical"
     }
     
     $htmlContent += "<div class=`"metric $realtimeClass`">`n"
@@ -333,9 +333,9 @@ if ($defenderStatus.Available) {
         
         # Registrar problemas con definiciones antiguas
         if ($defenderStatus.AntivirusSignatureAge -gt 14) {
-            Add-ITSupportError -Seccion "Windows Defender" -Mensaje "Las definiciones de antivirus tienen más de 14 días de antigüedad ($($defenderStatus.AntivirusSignatureAge) días)" -Severidad "Critical"
+            Add-ITSupportError -Section "Windows Defender" -Message "Las definiciones de antivirus tienen más de 14 días de antigüedad ($($defenderStatus.AntivirusSignatureAge) días)" -Severity "Critical"
         } elseif ($defenderStatus.AntivirusSignatureAge -gt 7) {
-            Add-ITSupportError -Seccion "Windows Defender" -Mensaje "Las definiciones de antivirus tienen más de 7 días de antigüedad ($($defenderStatus.AntivirusSignatureAge) días)" -Severidad "Warning"
+            Add-ITSupportError -Section "Windows Defender" -Message "Las definiciones de antivirus tienen más de 7 días de antigüedad ($($defenderStatus.AntivirusSignatureAge) días)" -Severity "Warning"
         }
         
         $htmlContent += "<div class=`"metric $definitionsClass`">`n"
@@ -352,11 +352,11 @@ if ($defenderStatus.Available) {
     }
 } else {
     # Registrar que no se pudo detectar antivirus
-    Add-ITSupportError -Seccion "Windows Defender" -Mensaje "No se pudo obtener información de protección antivirus" -Severidad "Critical"
+    Add-ITSupportError -Section "Windows Defender" -Message "Could not get antivirus protection information" -Severity "Critical"
     
     $htmlContent += "<div class=`"metric critical`">`n"
     $htmlContent += "<h3>Windows Defender / Antivirus</h3>`n"
-    $htmlContent += "<p>No se pudo obtener información de protección antivirus</p>`n"
+    $htmlContent += "<p>Could not get antivirus protection information</p>`n"
     if ($defenderStatus.Error) {
         $htmlContent += "<p>Error: $($defenderStatus.Error)</p>`n"
     }
@@ -379,7 +379,7 @@ if ($firewallStatus.Available) {
             
             # Registrar perfil de firewall deshabilitado
             if (-not $profile.Enabled) {
-                Add-ITSupportError -Seccion "Firewall" -Mensaje "El perfil de firewall '$($profile.Name)' está deshabilitado" -Severidad "Critical"
+                Add-ITSupportError -Section "Firewall" -Message "El perfil de firewall '$($profile.Name)' está deshabilitado" -Severity "Critical"
             }
             
             $htmlContent += "<div class=`"metric $statusClass`">`n"
@@ -393,7 +393,7 @@ if ($firewallStatus.Available) {
         
         # Registrar servicio de firewall deshabilitado
         if (-not $firewallStatus.Enabled) {
-            Add-ITSupportError -Seccion "Firewall" -Mensaje "El servicio de firewall está deshabilitado" -Severidad "Critical"
+            Add-ITSupportError -Section "Firewall" -Message "El servicio de firewall está deshabilitado" -Severity "Critical"
         }
         
         $htmlContent += "<div class=`"metric $statusClass`">`n"
@@ -403,10 +403,10 @@ if ($firewallStatus.Available) {
     }
 } else {
     # Registrar que no se pudo obtener información del firewall
-    Add-ITSupportError -Seccion "Firewall" -Mensaje "No se pudo obtener información del firewall" -Severidad "Warning"
+    Add-ITSupportError -Section "Firewall" -Message "Could not get firewall information" -Severity "Warning"
     
     $htmlContent += "<div class=`"metric warning`">`n"
-    $htmlContent += "<p>No se pudo obtener información del firewall</p>`n"
+    $htmlContent += "<p>Could not get firewall information</p>`n"
     if ($firewallStatus.Error) {
         $htmlContent += "<p>Error: $($firewallStatus.Error)</p>`n"
     }
@@ -425,7 +425,7 @@ if ($securityUpdates.UpdateCount -gt 0) {
     # Registrar advertencia si las actualizaciones son muy antiguas
     if ($securityUpdates.LastSecurityUpdate -and ((Get-Date) - $securityUpdates.LastSecurityUpdate).Days -gt 30) {
         $daysSince = ((Get-Date) - $securityUpdates.LastSecurityUpdate).Days
-        Add-ITSupportError -Seccion "Actualizaciones de Seguridad" -Mensaje "La última actualización de seguridad es de hace $daysSince días" -Severidad "Warning"
+        Add-ITSupportError -Section "Actualizaciones de Seguridad" -Message "La última actualización de seguridad es de hace $daysSince días" -Severity "Warning"
     }
     
     $htmlContent += "<div class=`"metric $updateClass`">`n"
@@ -446,7 +446,7 @@ if ($securityUpdates.UpdateCount -gt 0) {
     $htmlContent += "</div>`n"
 } else {
     # Registrar que no se pudieron obtener actualizaciones
-    Add-ITSupportError -Seccion "Actualizaciones de Seguridad" -Mensaje "No se pudieron obtener actualizaciones de seguridad" -Severidad "Warning"
+    Add-ITSupportError -Section "Actualizaciones de Seguridad" -Message "No se pudieron obtener actualizaciones de seguridad" -Severity "Warning"
     
     $htmlContent += "<div class=`"metric warning`">`n"
     $htmlContent += "<p>No se pudieron obtener actualizaciones de seguridad</p>`n"

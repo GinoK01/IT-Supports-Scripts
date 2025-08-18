@@ -1,67 +1,67 @@
 # ====================================================================
-# DETECTOR AUTOMÁTICO DE PROBLEMAS COMUNES - HERRAMIENTA PARA TÉCNICOS
+# AUTOMATIC COMMON PROBLEMS DETECTOR - TOOL FOR TECHNICIANS
 # ====================================================================
 #
-# PROPÓSITO:
-# Este script identifica automáticamente los problemas más frecuentes en equipos
-# Es ideal para ejecutar como primera herramienta de diagnóstico
+# PURPOSE:
+# This script automatically identifies the most common problems in computers
+# It's perfect for running as the first diagnostic tool
 #
-# PROBLEMAS QUE DETECTA:
-# - Espacio en disco insuficiente
-# - Memoria RAM agotada  
-# - Procesos que consumen muchos recursos
-# - Servicios críticos detenidos
-# - Problemas de conectividad de red
-# - Archivos temporales excesivos
+# PROBLEMS IT DETECTS:
+# - Not enough disk space
+# - RAM memory exhausted  
+# - Processes consuming too many resources
+# - Critical services stopped
+# - Network connectivity problems
+# - Excessive temporary files
 #
-# CÓMO INTERPRETAR LOS RESULTADOS:
-# 🔴 CRÍTICO: Requiere atención inmediata, puede causar fallas del sistema
-# 🟡 ADVERTENCIA: Debe revisarse, puede causar lentitud o problemas menores
-# 🟢 NORMAL: Todo funcionando correctamente
+# HOW TO READ THE RESULTS:
+# 🔴 CRITICAL: Needs immediate attention, can cause system failures
+# 🟡 WARNING: Should be checked, can cause slowness or minor problems
+# 🟢 NORMAL: Everything working correctly
 #
-# USO RECOMENDADO:
-# - Ejecutar antes de hacer cualquier cambio al sistema
-# - Como herramienta de diagnóstico inicial en llamadas de soporte
-# - Para documentar problemas encontrados
+# RECOMMENDED USE:
+# - Run before making any changes to the system
+# - As initial diagnostic tool during support calls
+# - To document problems found
 # ====================================================================
 
-# Configuración inicial del script
+# Initial script configuration
 try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction SilentlyContinue
 } catch {
-    # Si falla, continuar - algunos sistemas no permiten cambiar la política
+    # If it fails, continue - some systems don't allow changing the policy
 }
 
-# Configurar soporte para caracteres especiales
+# Configure support for special characters
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-# Crear directorio de reportes si no existe
+# Create reports directory if it doesn't exist
 $PSScriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $logsPath = Join-Path -Path $PSScriptRoot -ChildPath "logs_reports"
 if (-not (Test-Path $logsPath)) {
     New-Item -ItemType Directory -Path $logsPath -Force | Out-Null
 }
 
-# Cargar módulos de soporte
+# Load support modules
 $errorHandlerPath = Join-Path -Path $PSScriptRoot -ChildPath "ErrorHandler.ps1"
 if (Test-Path $errorHandlerPath) {
     . $errorHandlerPath
 } else {
-    Write-Warning "No se encontró el módulo ErrorHandler.ps1. Continuando sin manejo avanzado de errores."
-    # Funciones básicas para que el script no falle
-    function Add-ITSupportError { param($Seccion, $Mensaje) }
+    Write-Warning "ErrorHandler.ps1 module not found. Continuing without advanced error handling."
+    # Basic functions so the script doesn't fail
+    function Add-ITSupportError { param($Section, $Message) }
     function Clear-ITSupportErrors { }
     function Get-ErrorSummaryHTML { param($IncludeCSS) return "" }
     function Export-ErrorLog { param($Path) }
-    function Invoke-SafeExecution { param($Seccion, $ScriptBlock, $DefaultValue) try { & $ScriptBlock } catch { $DefaultValue } }
+    function Invoke-SafeExecution { param($Section, $ScriptBlock, $DefaultValue) try { & $ScriptBlock } catch { $DefaultValue } }
 }
 
-# Cargar plantilla HTML
+# Load HTML template
 $htmlTemplatePath = Join-Path -Path $PSScriptRoot -ChildPath "HTMLTemplate.ps1"
 if (Test-Path $htmlTemplatePath) {
     . $htmlTemplatePath
 } else {
-    Write-Warning "No se encontró HTMLTemplate.ps1. Usando formato básico."
+    Write-Warning "HTMLTemplate.ps1 not found. Using basic format."
     function Get-UnifiedHTMLTemplate { 
         param($Title, $ComputerName, $UserName, $DateTime, $IncludeSummary)
         return "<html><head><title>$Title</title></head><body><h1>$Title</h1><p>$ComputerName - $UserName - $DateTime</p>"
@@ -72,83 +72,83 @@ if (Test-Path $htmlTemplatePath) {
     }
 }
 
-# Limpiar errores de ejecuciones anteriores
+# Clear errors from previous executions
 Clear-ITSupportErrors
 
 # ====================================================================
-# INICIO DEL PROCESO DE DETECCIÓN
+# START OF DETECTION PROCESS
 # ====================================================================
 
-Write-Host "=== DETECTOR AUTOMÁTICO DE PROBLEMAS COMUNES ===" -ForegroundColor Green
+Write-Host "=== AUTOMATIC COMMON PROBLEMS DETECTOR ===" -ForegroundColor Green
 
-# Preparar variables para el reporte
+# Prepare variables for the report
 $timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
-$htmlFile = Join-Path -Path $logsPath -ChildPath "problemas_detectados_$timestamp.html"
+$htmlFile = Join-Path -Path $logsPath -ChildPath "problems_detected_$timestamp.html"
 $dateTimeFormatted = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $username = $env:USERNAME
 
-Write-Host "Iniciando detección automática de problemas..." -ForegroundColor Yellow
-Write-Host "Reporte se guardará en: $htmlFile" -ForegroundColor Gray
+Write-Host "Starting automatic problem detection..." -ForegroundColor Yellow
+Write-Host "Report will be saved to: $htmlFile" -ForegroundColor Gray
 
-# Contenedores para clasificar los problemas encontrados
-$criticalIssues = @()    # Problemas críticos que requieren atención inmediata
-$warningIssues = @()     # Advertencias que deben revisarse
-$infoMessages = @()      # Información de elementos que funcionan bien
+# Containers to classify the problems found
+$criticalIssues = @()    # Critical problems that need immediate attention
+$warningIssues = @()     # Warnings that should be checked
+$infoMessages = @()      # Information about elements that work well
 
 # ====================================================================
-# FUNCIÓN: VERIFICAR ESPACIO EN DISCO
+# FUNCTION: CHECK DISK SPACE
 # ====================================================================
-# Esta función verifica si hay suficiente espacio libre en todos los discos
-# NIVELES DE ALERTA:
-# - Menos del 10% libre = CRÍTICO (puede causar fallas del sistema)
-# - Menos del 20% libre = ADVERTENCIA (puede causar lentitud)
-# - 20% o más libre = NORMAL
+# This function checks if there's enough free space on all disks
+# ALERT LEVELS:
+# - Less than 10% free = CRITICAL (can cause system failures)
+# - Less than 20% free = WARNING (can cause slowness)
+# - 20% or more free = NORMAL
 
 function Test-DiskSpace {
-    Write-Host "`n[1/6] Verificando espacio en disco..." -ForegroundColor Yellow
+    Write-Host "`n[1/6] Checking disk space..." -ForegroundColor Yellow
     
-    # Obtener información de todos los discos duros (DriveType=3)
-    $disks = Invoke-SafeExecution -Seccion "Problemas-Espacio-Disco" -DefaultValue @() -ScriptBlock {
+    # Get information from all hard drives (DriveType=3)
+    $disks = Invoke-SafeExecution -Section "Problems-Disk-Space" -DefaultValue @() -ScriptBlock {
         Get-WmiObject -Query "SELECT * FROM Win32_LogicalDisk WHERE DriveType=3" -ErrorAction Stop
     }
     
     foreach ($disk in $disks) {
         try {
-            # Calcular espacio libre y total en GB
+            # Calculate free and total space in GB
             $freeSpaceGB = [Math]::Round($disk.FreeSpace / 1GB, 2)
             $totalSpaceGB = [Math]::Round($disk.Size / 1GB, 2)
             $freePercent = [Math]::Round(($disk.FreeSpace / $disk.Size) * 100, 2)
             
-            # Determinar el estado según el porcentaje libre
+            # Determine status based on free percentage
             if ($freePercent -lt 10) {
-                # CRÍTICO: Muy poco espacio libre
-                $message = "Unidad $($disk.DeviceID): Solo $freePercent% libre ($freeSpaceGB GB de $totalSpaceGB GB)"
-                $script:criticalIssues += @{Type="Disco Crítico"; Message=$message}
-                Add-ITSupportError -Seccion "Problemas-Disco-Crítico" -Mensaje $message -Severidad "Critical"
+                # CRITICAL: Very little free space
+                $message = "Drive $($disk.DeviceID): Only $freePercent% free ($freeSpaceGB GB of $totalSpaceGB GB)"
+                $script:criticalIssues += @{Type="Critical Disk"; Message=$message}
+                Add-ITSupportError -Section "Problems-Critical-Disk" -Message $message -Severity "Critical"
                 Write-Host "    🔴 $message" -ForegroundColor Red
             } elseif ($freePercent -lt 20) {
-                $message = "Unidad $($disk.DeviceID): Solo $freePercent% libre ($freeSpaceGB GB de $totalSpaceGB GB)"
-                $script:warningIssues += @{Type="Disco Bajo"; Message=$message}
-                Add-ITSupportError -Seccion "Problemas-Disco-Advertencia" -Mensaje $message -Severidad "Warning"
+                $message = "Drive $($disk.DeviceID): Only $freePercent% free ($freeSpaceGB GB of $totalSpaceGB GB)"
+                $script:warningIssues += @{Type="Low Disk"; Message=$message}
+                Add-ITSupportError -Section "Problems-Disk-Warning" -Message $message -Severity "Warning"
             } else {
-                $message = "Unidad $($disk.DeviceID): $freePercent% libre ($freeSpaceGB GB de $totalSpaceGB GB) - OK"
-                $script:infoMessages += @{Type="Disco OK"; Message=$message}
+                $message = "Drive $($disk.DeviceID): $freePercent% free ($freeSpaceGB GB of $totalSpaceGB GB) - OK"
+                $script:infoMessages += @{Type="Disk OK"; Message=$message}
             }
         } catch {
-            Add-ITSupportError -Seccion "Problemas-Disco-$($disk.DeviceID)" -ErrorRecord $_ -Severidad "Warning"
+            Add-ITSupportError -Section "Problems-Disk-$($disk.DeviceID)" -ErrorRecord $_ -Severity "Warning"
         }
     }
 }
 
-# Función para verificar procesos con alto uso de recursos
+# Function to check processes with high resource usage
 function Test-HighResourceProcesses {
-    Write-Host "Verificando procesos con alto uso de recursos..." -ForegroundColor Yellow
+    Write-Host "Checking processes with high resource usage..." -ForegroundColor Yellow
     
-    $topCPUProcesses = Invoke-SafeExecution -Seccion "Problemas-CPU-Procesos" -DefaultValue @() -ScriptBlock {
+    $topCPUProcesses = Invoke-SafeExecution -Section "Problems-CPU-Processes" -DefaultValue @() -ScriptBlock {
         Get-Process -ErrorAction Stop | Sort-Object -Property CPU -Descending | Select-Object -First 5
     }
     
-    $topMemoryProcesses = Invoke-SafeExecution -Seccion "Problemas-Memoria-Procesos" -DefaultValue @() -ScriptBlock {
+    $topMemoryProcesses = Invoke-SafeExecution -Section "Problems-Memory-Processes" -DefaultValue @() -ScriptBlock {
         Get-Process -ErrorAction Stop | Sort-Object -Property WorkingSet -Descending | Select-Object -First 5
     }
     
@@ -158,12 +158,12 @@ function Test-HighResourceProcesses {
             $memoryMB = [Math]::Round($proc.WorkingSet / 1MB, 2)
             $message = "$($proc.ProcessName): $cpuTime s CPU, $memoryMB MB RAM"
             
-            if ($memoryMB -gt 1000) {  # Más de 1GB de RAM
-                $script:warningIssues += @{Type="Proceso Alto Memoria"; Message="$($proc.ProcessName) usa $memoryMB MB de RAM"}
-                Add-ITSupportError -Seccion "Problemas-Proceso-Memoria" -Mensaje "$($proc.ProcessName) usa excesiva memoria: $memoryMB MB" -Severidad "Warning"
+            if ($memoryMB -gt 1000) {  # More than 1GB of RAM
+                $script:warningIssues += @{Type="High Memory Process"; Message="$($proc.ProcessName) uses $memoryMB MB of RAM"}
+                Add-ITSupportError -Section "Problems-Process-Memory" -Message "$($proc.ProcessName) uses excessive memory: $memoryMB MB" -Severity "Warning"
             }
         } catch {
-            Add-ITSupportError -Seccion "Problemas-Proceso-$($proc.ProcessName)" -ErrorRecord $_ -Severidad "Info"
+            Add-ITSupportError -Section "Problems-Process-$($proc.ProcessName)" -ErrorRecord $_ -Severity "Info"
         }
     }
     
@@ -171,14 +171,14 @@ function Test-HighResourceProcesses {
         try {
             $memoryMB = [Math]::Round($proc.WorkingSet / 1MB, 2)
         } catch {
-            Add-ITSupportError -Seccion "Problemas-Proceso-Memoria-$($proc.ProcessName)" -ErrorRecord $_ -Severidad "Info"
+            Add-ITSupportError -Section "Problems-Process-Memory-$($proc.ProcessName)" -ErrorRecord $_ -Severity "Info"
         }
     }
 }
 
-# Función para verificar servicios críticos
+# Function to check critical services
 function Test-CriticalServices {
-    Write-Host "Verificando servicios críticos..." -ForegroundColor Yellow
+    Write-Host "Checking critical services..." -ForegroundColor Yellow
     
     $criticalServices = @(
         @{Name="wuauserv"; DisplayName="Windows Update"},
@@ -190,69 +190,69 @@ function Test-CriticalServices {
     )
     
     foreach ($svc in $criticalServices) {
-        $serviceStatus = Invoke-SafeExecution -Seccion "Problemas-Servicio-$($svc.Name)" -ScriptBlock {
+        $serviceStatus = Invoke-SafeExecution -Section "Problems-Service-$($svc.Name)" -ScriptBlock {
             Get-Service -Name $svc.Name -ErrorAction Stop
         }
         
         if ($null -eq $serviceStatus) {
-            $message = "Servicio $($svc.DisplayName) ($($svc.Name)) no encontrado"
-            $script:infoMessages += @{Type="Servicio No Encontrado"; Message=$message}
+            $message = "Service $($svc.DisplayName) ($($svc.Name)) not found"
+            $script:infoMessages += @{Type="Service Not Found"; Message=$message}
         } elseif ($serviceStatus.Status -ne "Running") {
-            $message = "Servicio $($svc.DisplayName) ($($svc.Name)) no está en ejecución (Estado: $($serviceStatus.Status))"
-            $script:warningIssues += @{Type="Servicio Detenido"; Message=$message}
-            Add-ITSupportError -Seccion "Problemas-Servicios" -Mensaje $message -Severidad "Warning"
+            $message = "Service $($svc.DisplayName) ($($svc.Name)) is not running (Status: $($serviceStatus.Status))"
+            $script:warningIssues += @{Type="Stopped Service"; Message=$message}
+            Add-ITSupportError -Section "Problems-Services" -Message $message -Severity "Warning"
         } else {
-            $message = "Servicio $($svc.DisplayName) está funcionando correctamente"
-            $script:infoMessages += @{Type="Servicio OK"; Message=$message}
+            $message = "Service $($svc.DisplayName) is working correctly"
+            $script:infoMessages += @{Type="Service OK"; Message=$message}
         }
     }
 }
 
-# Función para verificar conectividad de red básica
+# Function to check basic network connectivity
 function Test-BasicConnectivity {
-    Write-Host "Verificando conectividad básica..." -ForegroundColor Yellow
+    Write-Host "Checking basic connectivity..." -ForegroundColor Yellow
     
     $tests = @(
-        @{Target="127.0.0.1"; Description="Loopback local"},
-        @{Target="8.8.8.8"; Description="DNS público de Google"}
+        @{Target="127.0.0.1"; Description="Local loopback"},
+        @{Target="8.8.8.8"; Description="Google public DNS"}
     )
     
     foreach ($test in $tests) {
-        $result = Invoke-SafeExecution -Seccion "Problemas-Red-$($test.Target)" -ScriptBlock {
+        $result = Invoke-SafeExecution -Section "Problems-Network-$($test.Target)" -ScriptBlock {
             Test-Connection -ComputerName $test.Target -Count 1 -ErrorAction Stop
         }
         
         if ($result) {
-            $message = "Conectividad a $($test.Description) ($($test.Target)): OK"
-            $script:infoMessages += @{Type="Red OK"; Message=$message}
+            $message = "Connectivity to $($test.Description) ($($test.Target)): OK"
+            $script:infoMessages += @{Type="Network OK"; Message=$message}
         } else {
-            $message = "Sin conectividad a $($test.Description) ($($test.Target))"
-            $script:criticalIssues += @{Type="Red Crítica"; Message=$message}
+            $message = "No connectivity to $($test.Description) ($($test.Target))"
+            $script:criticalIssues += @{Type="Critical Network"; Message=$message}
         }
     }
 }
 
-# Ejecutar todas las verificaciones
+# Run all checks
 Test-DiskSpace
 Test-HighResourceProcesses
 Test-CriticalServices
 Test-BasicConnectivity
 
-# Generar reporte HTML usando plantilla unificada
-$htmlHeader = Get-UnifiedHTMLTemplate -Title "🔍 Detector de Problemas del Sistema" -ComputerName $env:COMPUTERNAME -UserName $username -DateTime $dateTimeFormatted -IncludeSummary $false
+# Generate HTML report using unified template
+$htmlHeader = Get-UnifiedHTMLTemplate -Title "🔍 System Problem Detector" -ComputerName $env:COMPUTERNAME -UserName $username -DateTime $dateTimeFormatted -IncludeSummary $false
 
 $htmlSections = @"
         <div class="summary">
             <div class="summary-box critical">
-                <h3>🚨 Críticos</h3>
+                <h3>🚨 Critical</h3>
                 <p style="font-size: 2em; font-weight: bold;">$($criticalIssues.Count)</p>
             </div>
             <div class="summary-box warning">
-                <h3>⚠️ Advertencias</h3>
+                <h3>⚠️ Warnings</h3>
                 <p style="font-size: 2em; font-weight: bold;">$($warningIssues.Count)</p>
             </div>
             <div class="summary-box good">
-                <h3>✅ Funcionando</h3>
+                <h3>✅ Working</h3>
                 <p style="font-size: 2em; font-weight: bold;">$($infoMessages.Count)</p>
             </div>
         </div>
@@ -261,7 +261,7 @@ $htmlSections = @"
 if ($criticalIssues.Count -gt 0) {
     $htmlSections += @"
         <div class="diagnostic-section critical">
-            <h2>🚨 Problemas Críticos Detectados</h2>
+            <h2>🚨 Critical Problems Detected</h2>
 "@
     foreach ($issue in $criticalIssues) {
         $htmlSections += "<div class='issue-item issue-critical'><strong>$($issue.Type):</strong> $($issue.Message)</div>"
@@ -272,7 +272,7 @@ if ($criticalIssues.Count -gt 0) {
 if ($warningIssues.Count -gt 0) {
     $htmlSections += @"
         <div class="diagnostic-section warning">
-            <h2>⚠️ Advertencias</h2>
+            <h2>⚠️ Warnings</h2>
 "@
     foreach ($issue in $warningIssues) {
         $htmlSections += "<div class='issue-item issue-warning'><strong>$($issue.Type):</strong> $($issue.Message)</div>"
@@ -283,7 +283,7 @@ if ($warningIssues.Count -gt 0) {
 if ($infoMessages.Count -gt 0) {
     $htmlSections += @"
         <div class="diagnostic-section good">
-            <h2>✅ Elementos Funcionando Correctamente</h2>
+            <h2>✅ Elements Working Correctly</h2>
 "@
     foreach ($issue in $infoMessages) {
         $htmlSections += "<div class='issue-item issue-ok'><strong>$($issue.Type):</strong> $($issue.Message)</div>"
@@ -291,21 +291,21 @@ if ($infoMessages.Count -gt 0) {
     $htmlSections += "</div>"
 }
 
-# Generar footer y contenido completo
+# Generate footer and complete content
 $htmlFooter = (Get-ErrorSummaryHTML -IncludeCSS) + (Get-UnifiedHTMLFooter -IncludeCountingScript $false)
 $htmlContent = $htmlHeader + $htmlSections + $htmlFooter
 
-# Guardar archivos
+# Save files
 [System.IO.File]::WriteAllText($htmlFile, $htmlContent, [System.Text.Encoding]::UTF8)
 
-Write-Host "Detección de problemas completada."
-Write-Host "Reporte HTML: $htmlFile"
+Write-Host "Problem detection completed."
+Write-Host "HTML Report: $htmlFile"
 Write-Host ""
-Write-Host "RESUMEN:" -ForegroundColor Cyan
-Write-Host "- Problemas críticos: $($criticalIssues.Count)" -ForegroundColor $(if($criticalIssues.Count -gt 0){"Red"}else{"Green"})
-Write-Host "- Advertencias: $($warningIssues.Count)" -ForegroundColor $(if($warningIssues.Count -gt 0){"Yellow"}else{"Green"})
-Write-Host "- Elementos OK: $($infoMessages.Count)" -ForegroundColor Green
+Write-Host "SUMMARY:" -ForegroundColor Cyan
+Write-Host "- Critical problems: $($criticalIssues.Count)" -ForegroundColor $(if($criticalIssues.Count -gt 0){"Red"}else{"Green"})
+Write-Host "- Warnings: $($warningIssues.Count)" -ForegroundColor $(if($warningIssues.Count -gt 0){"Yellow"}else{"Green"})
+Write-Host "- OK elements: $($infoMessages.Count)" -ForegroundColor Green
 
 if ($Global:ITSupportErrors.Count -gt 0) {
-    Write-Host "Se detectaron $($Global:ITSupportErrors.Count) errores adicionales durante el análisis. Ver detalles en el reporte HTML." -ForegroundColor Yellow
+    Write-Host "$($Global:ITSupportErrors.Count) additional errors were detected during analysis. See details in the HTML report." -ForegroundColor Yellow
 }

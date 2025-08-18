@@ -1,83 +1,83 @@
 # ====================================================================
-# DIAGNÓSTICO COMPLETO DETALLADO - REPORTE PROFESIONAL PARA CLIENTES
+# COMPLETE DETAILED DIAGNOSIS - PROFESSIONAL REPORT FOR CLIENTS
 # ====================================================================
 #
-# PROPÓSITO:
-# Este script genera el reporte más completo y profesional disponible
-# Es ideal para entregas formales a clientes y documentación exhaustiva
+# PURPOSE:
+# This script generates the most complete and professional report available
+# It's perfect for formal deliveries to clients and exhaustive documentation
 #
-# QUÉ INCLUYE EL REPORTE:
-# - Inventario completo de hardware y especificaciones
-# - Lista de software instalado y versiones
-# - Análisis detallado de rendimiento (CPU, memoria, disco)
-# - Diagnóstico de conectividad de red
-# - Evaluación de seguridad básica
-# - Recomendaciones técnicas específicas
+# WHAT THE REPORT INCLUDES:
+# - Complete hardware inventory and specifications
+# - List of installed software and versions
+# - Detailed performance analysis (CPU, memory, disk)
+# - Network connectivity diagnosis
+# - Basic security evaluation
+# - Specific technical recommendations
 #
-# TIEMPO DE EJECUCIÓN: 5-10 minutos
+# EXECUTION TIME: 5-10 minutes
 #
-# CUÁNDO USARLO:
-# - Para entregar un reporte completo al cliente
-# - Documentación antes/después de un servicio técnico
-# - Análisis exhaustivo de equipos corporativos
-# - Evaluaciones de compra o venta de equipos
+# WHEN TO USE IT:
+# - To deliver a complete report to the client
+# - Documentation before/after a technical service
+# - Exhaustive analysis of corporate equipment
+# - Purchase or sale evaluations of equipment
 #
-# RESULTADO:
-# - Reporte HTML profesional con gráficos y tablas
-# - Fácil de enviar por email o imprimir
-# - Incluye resumen ejecutivo y detalles técnicos
+# RESULT:
+# - Professional HTML report with graphics and tables
+# - Easy to send by email or print
+# - Includes executive summary and technical details
 # ====================================================================
 
-# Configuración inicial del script
-Write-Host "=== INICIANDO DIAGNOSTICO COMPLETO DETALLADO ===" -ForegroundColor Yellow
+# Initial script configuration
+Write-Host "=== STARTING COMPLETE DETAILED DIAGNOSIS ===" -ForegroundColor Yellow
 try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction SilentlyContinue
 } catch {
-    # Si falla, continuar - algunos sistemas no permiten cambiar la política
+    # If it fails, continue - some systems don't allow changing the policy
 }
 
-# Configurar soporte para caracteres especiales (acentos, ñ, etc.)
+# Configure support for special characters (accents, ñ, etc.)
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-# Configurar rutas de trabajo
+# Configure working paths
 $PSScriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $logsPath = Join-Path -Path $PSScriptRoot -ChildPath "logs_reports"
 if (-not (Test-Path $logsPath)) {
     New-Item -ItemType Directory -Path $logsPath -Force | Out-Null
 }
 
-Write-Host "Preparando diagnóstico completo..." -ForegroundColor Green
-Write-Host "Los reportes se guardarán en: $logsPath" -ForegroundColor Gray
+Write-Host "Preparing complete diagnosis..." -ForegroundColor Green
+Write-Host "Reports will be saved to: $logsPath" -ForegroundColor Gray
 
 # ====================================================================
-# CARGAR MÓDULOS DE SOPORTE
+# LOAD SUPPORT MODULES
 # ====================================================================
-# Estos módulos proporcionan funciones adicionales para manejo de errores
-# y generación de reportes HTML profesionales
+# These modules provide additional functions for error handling
+# and professional HTML report generation
 
-# Cargar módulo de manejo de errores
+# Load error handling module
 $errorHandlerPath = Join-Path -Path $PSScriptRoot -ChildPath "ErrorHandler.ps1"
 if (Test-Path $errorHandlerPath) {
     . $errorHandlerPath
-    Write-Host "Módulo de manejo de errores cargado" -ForegroundColor Green
+    Write-Host "Error handling module loaded" -ForegroundColor Green
 } else {
-    Write-Warning "No se encontró el módulo ErrorHandler.ps1. Continuando sin manejo avanzado de errores."
-    # Crear funciones básicas para que el script no falle
-    function Add-ITSupportError { param($Seccion, $ErrorRecord) }
+    Write-Warning "ErrorHandler.ps1 module not found. Continuing without advanced error handling."
+    # Create basic functions so the script doesn't fail
+    function Add-ITSupportError { param($Section, $ErrorRecord) }
     function Clear-ITSupportErrors { }
     function Get-ErrorSummaryHTML { param($IncludeCSS) return "" }
     function Export-ErrorLog { param($Path) }
-    function Invoke-SafeExecution { param($Seccion, $ScriptBlock, $DefaultValue) try { & $ScriptBlock } catch { $DefaultValue } }
+    function Invoke-SafeExecution { param($Section, $ScriptBlock, $DefaultValue) try { & $ScriptBlock } catch { $DefaultValue } }
 }
 
-# Cargar plantilla HTML para reportes profesionales
+# Load HTML template for professional reports
 $htmlTemplatePath = Join-Path -Path $PSScriptRoot -ChildPath "HTMLTemplate.ps1"
 if (Test-Path $htmlTemplatePath) {
     . $htmlTemplatePath
-    Write-Host "Template HTML cargado correctamente" -ForegroundColor Green
+    Write-Host "HTML template loaded correctly" -ForegroundColor Green
 } else {
-    Write-Warning "No se encontró HTMLTemplate.ps1. Usando formato básico."
-    # Funciones básicas para generar HTML si no está disponible la plantilla
+    Write-Warning "HTMLTemplate.ps1 not found. Using basic format."
+    # Basic functions to generate HTML if template is not available
     function Get-UnifiedHTMLTemplate { 
         param($Title, $ComputerName, $UserName, $DateTime, $IncludeSummary)
         return "<html><head><title>$Title</title></head><body><h1>$Title</h1>"
@@ -88,70 +88,70 @@ if (Test-Path $htmlTemplatePath) {
     }
 }
 
-# Limpiar errores de ejecuciones anteriores
+# Clear errors from previous executions
 Clear-ITSupportErrors
 
-# ==================== FUNCIONES DE DIAGNOSTICO DETALLADAS ====================
+# ==================== DETAILED DIAGNOSTIC FUNCTIONS ====================
 
-# Función mejorada para obtener el gateway predeterminado
+# Enhanced function to get the default gateway
 function Get-DefaultGateway {
-    Write-Host "Detectando gateway predeterminado..." -ForegroundColor Yellow
+    Write-Host "Detecting default gateway..." -ForegroundColor Yellow
     
-    $gateway = Invoke-SafeExecution -Seccion "Red-Gateway-Discovery" -ScriptBlock {
-        # Método 1: Usar Get-CimInstance (más moderno)
+    $gateway = Invoke-SafeExecution -Section "Network-Gateway-Discovery" -ScriptBlock {
+        # Method 1: Use Get-CimInstance (more modern)
         try {
             $networkConfig = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled=True" -ErrorAction Stop
             foreach ($adapter in $networkConfig) {
                 if ($adapter.DefaultIPGateway -and $adapter.DefaultIPGateway[0]) {
-                    Write-Host "  Gateway detectado vía CIM: $($adapter.DefaultIPGateway[0])" -ForegroundColor Green
+                    Write-Host "  Gateway detected via CIM: $($adapter.DefaultIPGateway[0])" -ForegroundColor Green
                     return $adapter.DefaultIPGateway[0]
                 }
             }
         } catch {
-            # Continuar con el siguiente método
+            # Continue with next method
         }
         
-        # Método 2: Usar Get-WmiObject (compatibilidad)
+        # Method 2: Use Get-WmiObject (compatibility)
         try {
             $activeAdapters = Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled=True" -ErrorAction Stop
             foreach ($adapter in $activeAdapters) {
                 if ($adapter.DefaultIPGateway -and $adapter.DefaultIPGateway[0]) {
-                    Write-Host "  Gateway detectado vía WMI: $($adapter.DefaultIPGateway[0])" -ForegroundColor Green
+                    Write-Host "  Gateway detected via WMI: $($adapter.DefaultIPGateway[0])" -ForegroundColor Green
                     return $adapter.DefaultIPGateway[0]
                 }
             }
         } catch {
-            # Continuar con el siguiente método
+            # Continue with next method
         }
         
-        # Método 3: Usar route print (más confiable)
+        # Method 3: Use route print (more reliable)
         try {
             $routeOutput = cmd /c "route print 0.0.0.0" 2>$null | Select-String "0.0.0.0.*0.0.0.0"
             if ($routeOutput) {
                 $routeParts = $routeOutput.Line -split '\s+' | Where-Object { $_ -ne '' }
                 for ($i = 0; $i -lt $routeParts.Length; $i++) {
                     if ($routeParts[$i] -match '^\d+\.\d+\.\d+\.\d+$' -and $routeParts[$i] -ne '0.0.0.0') {
-                        Write-Host "  Gateway detectado vía route: $($routeParts[$i])" -ForegroundColor Green
+                        Write-Host "  Gateway detected via route: $($routeParts[$i])" -ForegroundColor Green
                         return $routeParts[$i]
                     }
                 }
             }
         } catch {
-            # Continuar al return null
+            # Continue to return null
         }
         
         return $null
     } -DefaultValue $null
     
     if (-not $gateway) {
-        Write-Host "  No se pudo detectar gateway automáticamente" -ForegroundColor Red
-        Add-ITSupportError -Seccion "Red-Gateway-Discovery" -ErrorRecord "No se pudo detectar el gateway predeterminado"
+        Write-Host "  Could not detect gateway automatically" -ForegroundColor Red
+        Add-ITSupportError -Section "Network-Gateway-Discovery" -ErrorRecord "Could not detect default gateway"
     }
     
     return $gateway
 }
 
-# Función para probar conectividad de red
+# Function to test network connectivity
 function Test-NetworkConnection {
     param(
         [string]$Target,
@@ -159,17 +159,17 @@ function Test-NetworkConnection {
         [int]$Count = 4
     )
     
-    return Invoke-SafeExecution -Seccion "Red-Conectividad-$Target" -ScriptBlock {
-        Write-Host "  Probando conectividad a $Description ($Target)..." -ForegroundColor Gray
+    return Invoke-SafeExecution -Section "Network-Connectivity-$Target" -ScriptBlock {
+        Write-Host "  Testing connectivity to $Description ($Target)..." -ForegroundColor Gray
         
         $result = Test-Connection -ComputerName $Target -Count $Count -ErrorAction Stop
         
-        # Manejar diferentes versiones de PowerShell que pueden tener estructuras de objeto diferentes
+        # Handle different PowerShell versions that may have different object structures
         $responseTime = 0
         $packetsReceived = 0
         
         if ($result) {
-            # Intentar obtener tiempo de respuesta (múltiples propiedades posibles)
+            # Try to get response time (multiple possible properties)
             $responseTimes = @()
             foreach ($ping in $result) {
                 if ($ping.ResponseTime -ne $null) {
@@ -187,15 +187,15 @@ function Test-NetworkConnection {
             if ($responseTimes.Count -gt 0) {
                 $responseTime = ($responseTimes | Measure-Object -Average).Average
             } else {
-                # Fallback: usar la longitud del array como indicador de paquetes recibidos
+                # Fallback: use array length as indicator of packets received
                 $packetsReceived = $result.Count
-                $responseTime = 1 # Valor por defecto si no se puede obtener el tiempo
+                $responseTime = 1 # Default value if response time cannot be obtained
             }
         }
         
         $packetLoss = [math]::Round((($Count - $packetsReceived) / $Count) * 100, 2)
         
-        Write-Host "    OK $Description - Promedio: $([math]::Round($responseTime, 2))ms" -ForegroundColor Green
+        Write-Host "    OK $Description - Average: $([math]::Round($responseTime, 2))ms" -ForegroundColor Green
         
         return @{
             Target = $Target
@@ -227,12 +227,12 @@ function Get-CPUInfo {
     }
     
     # Obtener información del procesador
-    $cpuData.Info = Invoke-SafeExecution -Seccion "Rendimiento-CPU-Info" -ScriptBlock {
+    $cpuData.Info = Invoke-SafeExecution -Section "Rendimiento-CPU-Info" -ScriptBlock {
         Get-CimInstance -ClassName Win32_Processor -ErrorAction Stop
     } -DefaultValue $null
     
     # Método 1: Usar Get-Counter (más preciso)
-    $cpuLoad = Invoke-SafeExecution -Seccion "Rendimiento-CPU-Counter" -ScriptBlock {
+    $cpuLoad = Invoke-SafeExecution -Section "Rendimiento-CPU-Counter" -ScriptBlock {
         Write-Host "  Tomando múltiples muestras de CPU..." -ForegroundColor Gray
         $samples = @()
         
@@ -261,7 +261,7 @@ function Get-CPUInfo {
     
     # Método 2: Fallback usando WMI
     if (-not $cpuLoad) {
-        $cpuLoad = Invoke-SafeExecution -Seccion "Rendimiento-CPU-WMI" -ScriptBlock {
+        $cpuLoad = Invoke-SafeExecution -Section "Rendimiento-CPU-WMI" -ScriptBlock {
             Write-Host "  Usando método WMI como respaldo..." -ForegroundColor Gray
             $cpu = Get-WmiObject -Class Win32_Processor
             if ($cpu.LoadPercentage) {
@@ -291,7 +291,7 @@ function Get-CPUInfo {
 function Get-MemoryInfo {
     Write-Host "Analizando uso de memoria..." -ForegroundColor Yellow
     
-    return Invoke-SafeExecution -Seccion "Rendimiento-Memoria" -ScriptBlock {
+    return Invoke-SafeExecution -Section "Rendimiento-Memoria" -ScriptBlock {
         # Información del sistema operativo
         $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop
         
@@ -342,7 +342,7 @@ function Get-MemoryInfo {
 function Get-DiskInfo {
     Write-Host "Analizando discos..." -ForegroundColor Yellow
     
-    return Invoke-SafeExecution -Seccion "Rendimiento-Discos" -ScriptBlock {
+    return Invoke-SafeExecution -Section "Rendimiento-Discos" -ScriptBlock {
         $disks = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DriveType=3" -ErrorAction Stop
         $diskData = @()
         
@@ -385,7 +385,7 @@ function Get-DefenderStatus {
     Write-Host "Verificando estado de Windows Defender..." -ForegroundColor Yellow
     
     # Método 1: Get-MpComputerStatus (Windows 8+)
-    $defenderStatus = Invoke-SafeExecution -Seccion "Windows Defender Primary" -ScriptBlock {
+    $defenderStatus = Invoke-SafeExecution -Section "Windows Defender Primary" -ScriptBlock {
         Get-MpComputerStatus -ErrorAction Stop
     } -DefaultValue $null
     
@@ -406,7 +406,7 @@ function Get-DefenderStatus {
     }
     
     # Método 2: Verificar servicio de Windows Defender
-    $defenderService = Invoke-SafeExecution -Seccion "Windows Defender Service" -ScriptBlock {
+    $defenderService = Invoke-SafeExecution -Section "Windows Defender Service" -ScriptBlock {
         Get-Service -Name "WinDefend" -ErrorAction Stop
     } -DefaultValue $null
     
@@ -422,7 +422,7 @@ function Get-DefenderStatus {
     }
     
     # Método 3: Verificar procesos de antivirus
-    $antivirusProcesses = Invoke-SafeExecution -Seccion "Antivirus Processes" -ScriptBlock {
+    $antivirusProcesses = Invoke-SafeExecution -Section "Antivirus Processes" -ScriptBlock {
         $processes = Get-Process -ErrorAction Stop | Where-Object { 
             $_.ProcessName -match "(MsMpEng|NisSrv|avp|avgnt|avguard|avastsvc|mbamservice|mcshield)" 
         }
@@ -453,7 +453,7 @@ function Get-FirewallStatus {
     Write-Host "Verificando configuración del firewall..." -ForegroundColor Yellow
     
     # Método 1: Get-NetFirewallProfile (Windows 8+)
-    $firewallProfiles = Invoke-SafeExecution -Seccion "Firewall Profiles" -ScriptBlock {
+    $firewallProfiles = Invoke-SafeExecution -Section "Firewall Profiles" -ScriptBlock {
         Get-NetFirewallProfile -ErrorAction Stop
     } -DefaultValue $null
     
@@ -476,7 +476,7 @@ function Get-FirewallStatus {
     }
     
     # Método 2: netsh firewall (compatibilidad)
-    $netshResult = Invoke-SafeExecution -Seccion "Firewall netsh" -ScriptBlock {
+    $netshResult = Invoke-SafeExecution -Section "Firewall netsh" -ScriptBlock {
         $output = netsh advfirewall show allprofiles state 2>$null
         return $output
     } -DefaultValue $null
@@ -536,7 +536,7 @@ foreach ($target in $targets) {
 
 # Información de adaptadores de red
 Write-Host "Obteniendo información de adaptadores de red..." -ForegroundColor Yellow
-$networkAdapters = Invoke-SafeExecution -Seccion "Red-Adaptadores" -ScriptBlock {
+$networkAdapters = Invoke-SafeExecution -Section "Red-Adaptadores" -ScriptBlock {
     $adapters = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled=True" -ErrorAction Stop
     $adapterData = @()
     
@@ -575,7 +575,7 @@ $criticalServices = @("wuauserv", "wscsvc", "WinRM", "Themes", "Spooler")
 $serviceStatus = @()
 
 foreach ($serviceName in $criticalServices) {
-    $service = Invoke-SafeExecution -Seccion "Servicio-$serviceName" -ScriptBlock {
+    $service = Invoke-SafeExecution -Section "Servicio-$serviceName" -ScriptBlock {
         Get-Service -Name $serviceName -ErrorAction Stop
     } -DefaultValue $null
     
@@ -600,7 +600,7 @@ foreach ($serviceName in $criticalServices) {
 
 # Usuarios locales
 Write-Host "Analizando cuentas de usuario..." -ForegroundColor Yellow
-$localUsers = Invoke-SafeExecution -Seccion "Usuarios-Locales" -ScriptBlock {
+$localUsers = Invoke-SafeExecution -Section "Usuarios-Locales" -ScriptBlock {
     $users = Get-CimInstance -ClassName Win32_UserAccount -Filter "LocalAccount=True" -ErrorAction Stop
     $userData = @()
     
@@ -624,7 +624,7 @@ Write-Host "`n=== INVENTARIO DE HARDWARE/SOFTWARE ===" -ForegroundColor Cyan
 
 # Información del sistema
 Write-Host "Obteniendo información del sistema..." -ForegroundColor Yellow
-$systemInfo = Invoke-SafeExecution -Seccion "Sistema-Info" -ScriptBlock {
+$systemInfo = Invoke-SafeExecution -Section "Sistema-Info" -ScriptBlock {
     $computer = Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction Stop
     $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop
     $bios = Get-CimInstance -ClassName Win32_BIOS -ErrorAction Stop
@@ -650,7 +650,7 @@ Write-Host "OK Información del sistema obtenida" -ForegroundColor Green
 Write-Host "`n=== VALIDACIÓN DE USUARIO ===" -ForegroundColor Cyan
 Write-Host "Analizando permisos del usuario..." -ForegroundColor Yellow
 
-$userInfo = Invoke-SafeExecution -Seccion "Usuario-Actual" -ScriptBlock {
+$userInfo = Invoke-SafeExecution -Section "Usuario-Actual" -ScriptBlock {
     $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = New-Object System.Security.Principal.WindowsPrincipal($currentUser)
     $isAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -895,7 +895,7 @@ try {
     Write-Host "OK Reporte HTML generado: $htmlReportPath" -ForegroundColor Green
 } catch {
     Write-Host "ERROR al guardar el reporte: $($_.Exception.Message)" -ForegroundColor Red
-    Add-ITSupportError -Seccion "Reporte-HTML" -ErrorRecord $_
+    Add-ITSupportError -Section "Reporte-HTML" -ErrorRecord $_
 }
 
 # Exportar log de errores si hay errores registrados

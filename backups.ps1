@@ -81,11 +81,11 @@ function Backup-Folder {
     
     if (-not (Test-Path $sourcePath)) {
         $backupResult.ErrorMessage = "La carpeta de origen no existe"
-        Add-ITSupportError -Seccion "Backup-$folderName" -Mensaje "La carpeta de origen no existe: $sourcePath" -Severidad "Warning"
+        Add-ITSupportError -Section "Backup-$folderName" -Message "La carpeta de origen no existe: $sourcePath" -Severity "Warning"
         return $backupResult
     }
     
-    $backupResult = Invoke-SafeExecution -Seccion "Backup-$folderName" -DefaultValue $backupResult -ScriptBlock {
+    $backupResult = Invoke-SafeExecution -Section "Backup-$folderName" -DefaultValue $backupResult -ScriptBlock {
         $destinationFolder = Join-Path -Path $destinationPath -ChildPath "$folderName-$timestamp"
         New-Item -ItemType Directory -Path $destinationFolder -Force | Out-Null
         
@@ -107,7 +107,7 @@ function Backup-Folder {
                 $totalSize += $file.Length
                 $copiedFiles++
             } catch {
-                Add-ITSupportError -Seccion "Backup-$folderName-File" -ErrorRecord $_ -Severidad "Warning"
+                Add-ITSupportError -Section "Backup-$folderName-File" -ErrorRecord $_ -Severity "Warning"
             }
         }
         

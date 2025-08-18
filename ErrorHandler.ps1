@@ -11,47 +11,47 @@ function Add-ITSupportError {
     .SYNOPSIS
     Adds an error to the global error collection
     
-    .PARAMETER Seccion
+    .PARAMETER Section
     The section or module where the error occurred
     
     .PARAMETER ErrorRecord
     The PowerShell ErrorRecord object
     
-    .PARAMETER Mensaje
+    .PARAMETER Message
     Custom error message (optional)
     
-    .PARAMETER Severidad
+    .PARAMETER Severity
     Severity level: Info, Warning, Error, Critical
     #>
     param(
-        [string]$Seccion,
+        [string]$Section,
         [System.Management.Automation.ErrorRecord]$ErrorRecord = $null,
-        [string]$Mensaje = "",
+        [string]$Message = "",
         [ValidateSet("Info", "Warning", "Error", "Critical")]
-        [string]$Severidad = "Error"
+        [string]$Severity = "Error"
     )
     
     try {
         $errorObj = [pscustomobject]@{
             Timestamp = (Get-Date)
-            Seccion   = $Seccion
-            Mensaje   = if ($ErrorRecord) { $ErrorRecord.Exception.Message } else { $Mensaje }
-            Categoria = if ($ErrorRecord) { $ErrorRecord.CategoryInfo.Category } else { "General" }
-            Objetivo  = if ($ErrorRecord) { $ErrorRecord.TargetObject } else { "" }
-            Severidad = $Severidad
-            LineaError = if ($ErrorRecord) { $ErrorRecord.InvocationInfo.ScriptLineNumber } else { 0 }
-            Comando   = if ($ErrorRecord) { $ErrorRecord.InvocationInfo.MyCommand.Name } else { "" }
+            Section   = $Section
+            Message   = if ($ErrorRecord) { $ErrorRecord.Exception.Message } else { $Message }
+            Category = if ($ErrorRecord) { $ErrorRecord.CategoryInfo.Category } else { "General" }
+            Target  = if ($ErrorRecord) { $ErrorRecord.TargetObject } else { "" }
+            Severity = $Severity
+            ErrorLine = if ($ErrorRecord) { $ErrorRecord.InvocationInfo.ScriptLineNumber } else { 0 }
+            Command   = if ($ErrorRecord) { $ErrorRecord.InvocationInfo.MyCommand.Name } else { "" }
         }
         
         $null = $Global:ITSupportErrors.Add($errorObj)
         
         # Also write to error log if in verbose mode
         if ($VerbosePreference -eq "Continue") {
-            Write-Verbose "[$Severidad] $Seccion`: $($errorObj.Mensaje)"
+            Write-Verbose "[$Severity] $Section`: $($errorObj.Message)"
         }
     } catch {
         # If error registration fails, at least write it to console
-        Write-Warning "Error registering error in section '$Seccion': $_"
+        Write-Warning "Error registering error in section '$Section': $_"
     }
 }
 
@@ -60,7 +60,7 @@ function Invoke-SafeExecution {
     .SYNOPSIS
     Executes a scriptblock safely, automatically capturing errors
     
-    .PARAMETER Seccion
+    .PARAMETER Section
     The section where the code is executed
     
     .PARAMETER ScriptBlock
@@ -73,7 +73,7 @@ function Invoke-SafeExecution {
     Whether to suppress errors (not show them in console)
     #>
     param(
-        [string]$Seccion,
+        [string]$Section,
         [scriptblock]$ScriptBlock,
         [object]$DefaultValue = $null,
         [switch]$SuppressErrors
@@ -82,10 +82,10 @@ function Invoke-SafeExecution {
     try {
         return & $ScriptBlock
     } catch {
-        Add-ITSupportError -Seccion $Seccion -ErrorRecord $_
+        Add-ITSupportError -Section $Section -ErrorRecord $_
         
         if (-not $SuppressErrors) {
-            Write-Warning "Error in section '$Seccion': $($_.Exception.Message)"
+            Write-Warning "Error in section '$Section': $($_.Exception.Message)"
         }
         
         return $DefaultValue
@@ -187,7 +187,7 @@ function Get-ErrorSummaryHTML {
     }
     
     # Group errors by severity
-    $errorsBySeverity = $Global:ITSupportErrors | Group-Object -Property Severidad
+    $errorsBySeverity = $Global:ITSupportErrors | Group-Object -Property Severity
     $criticalCount = ($errorsBySeverity | Where-Object { $_.Name -eq "Critical" } | Select-Object -ExpandProperty Count) -or 0
     $errorCount = ($errorsBySeverity | Where-Object { $_.Name -eq "Error" } | Select-Object -ExpandProperty Count) -or 0
     $warningCount = ($errorsBySeverity | Where-Object { $_.Name -eq "Warning" } | Select-Object -ExpandProperty Count) -or 0
@@ -231,22 +231,22 @@ function Get-ErrorSummaryHTML {
 "@
     
     foreach ($error in $Global:ITSupportErrors | Sort-Object Timestamp) {
-        $encodedSeccion = [System.Web.HttpUtility]::HtmlEncode($error.Seccion)
-        $encodedMensaje = [System.Web.HttpUtility]::HtmlEncode($error.Mensaje)
+        $encodedSection = [System.Web.HttpUtility]::HtmlEncode($error.Section)
+        $encodedMessage = [System.Web.HttpUtility]::HtmlEncode($error.Message)
         # Truncate message if too long for initial view
-        $displayMensaje = if ($encodedMensaje.Length -gt 100) {
-            $encodedMensaje.Substring(0, 97) + "..."
+        $displayMessage = if ($encodedMessage.Length -gt 100) {
+            $encodedMessage.Substring(0, 97) + "..."
         } else {
-            $encodedMensaje
+            $encodedMessage
         }
         
         $html += @"
-                        <tr class="error-row $($error.Severidad.ToLower())" title="$encodedMensaje">
+                        <tr class="error-row $($error.Severity.ToLower())" title="$encodedMessage">
                             <td>$($error.Timestamp.ToString('HH:mm:ss'))</td>
-                            <td>$encodedSeccion</td>
-                            <td>$($error.Severidad)</td>
-                            <td>$displayMensaje</td>
-                            <td>$($error.Categoria)</td>
+                            <td>$encodedSection</td>
+                            <td>$($error.Severity)</td>
+                            <td>$displayMessage</td>
+                            <td>$($error.Category)</td>
                         </tr>
 "@
     }
@@ -295,14 +295,14 @@ function Export-ErrorLog {
     $logContent += ""
     
     foreach ($error in $Global:ITSupportErrors | Sort-Object Timestamp) {
-        $logContent += "[$($error.Timestamp.ToString('yyyy-MM-dd HH:mm:ss'))] [$($error.Severidad)] $($error.Seccion)"
-        $logContent += "  Message: $($error.Mensaje)"
-        $logContent += "  Category: $($error.Categoria)"
-        if ($error.Objetivo) {
-            $logContent += "  Target: $($error.Objetivo)"
+        $logContent += "[$($error.Timestamp.ToString('yyyy-MM-dd HH:mm:ss'))] [$($error.Severity)] $($error.Section)"
+        $logContent += "  Message: $($error.Message)"
+        $logContent += "  Category: $($error.Category)"
+        if ($error.Target) {
+            $logContent += "  Target: $($error.Target)"
         }
-        if ($error.LineaError -gt 0) {
-            $logContent += "  Line: $($error.LineaError)"
+        if ($error.ErrorLine -gt 0) {
+            $logContent += "  Line: $($error.ErrorLine)"
         }
         $logContent += ""
     }

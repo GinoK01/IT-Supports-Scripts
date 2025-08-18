@@ -361,7 +361,7 @@ function Get-UnifiedHTMLFooter {
                 if (warningCountElement) warningCountElement.textContent = warningItems;
                 if (criticalCountElement) criticalCountElement.textContent = criticalItems;
                 
-                console.log('Estadísticas de ' + modulePrefix + ' cargadas: OK=' + goodItems + ', Advertencias=' + warningItems + ', Críticos=' + criticalItems);
+                console.log('Statistics for ' + modulePrefix + ' loaded: OK=' + goodItems + ', Warnings=' + warningItems + ', Critical=' + criticalItems);
             });
         </script>
 "@
@@ -392,7 +392,7 @@ function Get-UnifiedHTMLFooter {
                 if (warningCountElement) warningCountElement.textContent = warningItems;
                 if (criticalCountElement) criticalCountElement.textContent = criticalItems;
                 
-                console.log('Estadísticas cargadas: OK=' + goodItems + ', Advertencias=' + warningItems + ', Críticos=' + criticalItems);
+                console.log('Estadísticas loaded: OK=' + goodItems + ', Warnings=' + warningItems + ', Critical=' + criticalItems);
             });
         </script>
 '@
@@ -460,7 +460,7 @@ function Get-ModuleCountingScript {
                 if (warningCountElement) warningCountElement.textContent = warningItems;
                 if (criticalCountElement) criticalCountElement.textContent = criticalItems;
                 
-                console.log('Estadísticas del módulo ' + modulePrefix + ' cargadas: OK=' + goodItems + ', Advertencias=' + warningItems + ', Críticos=' + criticalItems);
+                console.log('Statistics for module ' + modulePrefix + ' loaded: OK=' + goodItems + ', Warnings=' + warningItems + ', Critical=' + criticalItems);
             });
         </script>
 "@

@@ -1,4 +1,4 @@
-# Intentar configurar la política de ejecución (silenciando errores si falla)
+# Try to configure execution policy (silencing errors if it fails)
 try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction SilentlyContinue
 } catch {
@@ -65,7 +65,7 @@ function Test-NetworkConnection {
         [int]$Count = 2
     )
     
-    $result = Invoke-SafeExecution -Seccion "Red-$Description" -ScriptBlock {
+    $result = Invoke-SafeExecution -Section "Red-$Description" -ScriptBlock {
         Test-Connection -ComputerName $Target -Count $Count -ErrorAction Stop
     }
     
@@ -79,7 +79,7 @@ function Test-NetworkConnection {
 # Función para obtener el gateway predeterminado dinámicamente
 function Get-DefaultGateway {
     try {
-        $gateway = Invoke-SafeExecution -Seccion "Red-Gateway-Discovery" -ScriptBlock {
+        $gateway = Invoke-SafeExecution -Section "Red-Gateway-Discovery" -ScriptBlock {
             # Método 1: Intentar con Get-NetIPConfiguration (más moderno)
             try {
                 $netConfig = Get-NetIPConfiguration -ErrorAction Stop | Where-Object { $_.IPv4DefaultGateway -ne $null }
@@ -126,7 +126,7 @@ function Get-DefaultGateway {
         
         return $gateway
     } catch {
-        Add-ITSupportError -Seccion "Red-Gateway-Discovery" -ErrorRecord $_
+        Add-ITSupportError -Section "Red-Gateway-Discovery" -ErrorRecord $_
         return $null
     }
 }
@@ -166,8 +166,8 @@ if ($detectedGateway) {
 $dnsResult = Test-NetworkConnection -Target "8.8.8.8" -Description "DNS Público"
 $internetResult = Test-NetworkConnection -Target "google.com" -Description "Sitio Web Externo"
 
-# Obtener información de adaptadores de red usando múltiples métodos
-$networkAdapters = Invoke-SafeExecution -Seccion "Red-Adaptadores" -DefaultValue @() -ScriptBlock {
+# Get network adapter information using multiple methods
+$networkAdapters = Invoke-SafeExecution -Section "Red-Adaptadores" -DefaultValue @() -ScriptBlock {
     Write-Host "  Detectando adaptadores de red..." -ForegroundColor Gray
     $allAdapters = @()
     
@@ -177,7 +177,7 @@ $networkAdapters = Invoke-SafeExecution -Seccion "Red-Adaptadores" -DefaultValue
         $netAdapters = Get-NetAdapter -ErrorAction Stop | Where-Object { $_.Status -eq "Up" }
         
         foreach ($adapter in $netAdapters) {
-            # Obtener configuración IP para este adaptador
+            # Get IP configuration for this adapter
             $ipConfig = try {
                 Get-NetIPConfiguration -InterfaceIndex $adapter.InterfaceIndex -ErrorAction SilentlyContinue
             } catch {
@@ -293,7 +293,7 @@ $networkAdapters = Invoke-SafeExecution -Seccion "Red-Adaptadores" -DefaultValue
 
 # Si aún no tenemos adaptadores, mostrar un mensaje de advertencia
 if ($networkAdapters.Count -eq 0) {
-    Add-ITSupportError -Seccion "Red-Adaptadores" -Mensaje "No se pudieron detectar adaptadores de red activos" -Severidad "Warning"
+    Add-ITSupportError -Section "Red-Adaptadores" -Message "No se pudieron detectar adaptadores de red activos" -Severity "Warning"
     Write-Host "Advertencia: No se detectaron adaptadores de red activos" -ForegroundColor Yellow
 }
 
@@ -307,13 +307,13 @@ $internetClass = if($internetResult){'good'}else{'critical'}
 
 # Registrar errores críticos de conectividad
 if (-not $gatewayResult) {
-    Add-ITSupportError -Seccion "Conectividad Red" -Mensaje "No se pudo conectar al gateway predeterminado ($detectedGateway)" -Severidad "Critical"
+    Add-ITSupportError -Section "Conectividad Red" -Message "No se pudo conectar al gateway predeterminado ($detectedGateway)" -Severity "Critical"
 }
 if (-not $dnsResult) {
-    Add-ITSupportError -Seccion "Conectividad Red" -Mensaje "No se pudo conectar a DNS público (8.8.8.8)" -Severidad "Critical"
+    Add-ITSupportError -Section "Conectividad Red" -Message "No se pudo conectar a DNS público (8.8.8.8)" -Severity "Critical"
 }
 if (-not $internetResult) {
-    Add-ITSupportError -Seccion "Conectividad Red" -Mensaje "No se pudo conectar a Internet (google.com)" -Severidad "Critical"
+    Add-ITSupportError -Section "Conectividad Red" -Message "No se pudo conectar a Internet (google.com)" -Severity "Critical"
 }
 
 $htmlContent += @"
@@ -380,7 +380,7 @@ foreach($adapter in $networkAdapters) {
 
 $htmlContent += "</table></div>"
 
-# Agregar información de DNS si está disponible
+# Add DNS information if available
 if ($networkAdapters | Where-Object { $_.DNSServers -ne "N/A" }) {
     $htmlContent += "<div class='metric'>"
     $htmlContent += "<h3>Servidores DNS Configurados</h3>"

@@ -43,11 +43,11 @@ if (Test-Path $errorHandlerPath) {
 } else {
     Write-Warning "ErrorHandler.ps1 module not found. Continuing without advanced error handling."
     # Create basic functions so the script doesn't fail
-    function Add-ITSupportError { param($Seccion, $Mensaje) }
+    function Add-ITSupportError { param($Section, $Message) }
     function Clear-ITSupportErrors { }
     function Get-ErrorSummaryHTML { param($IncludeCSS) return "" }
     function Export-ErrorLog { param($Path) }
-    function Invoke-SafeExecution { param($Seccion, $ScriptBlock, $DefaultValue) try { & $ScriptBlock } catch { $DefaultValue } }
+    function Invoke-SafeExecution { param($Section, $ScriptBlock, $DefaultValue) try { & $ScriptBlock } catch { $DefaultValue } }
 }
 
 # Load template to generate professional HTML reports
@@ -76,7 +76,7 @@ Clear-ITSupportErrors
 
 # Create unique name for report file (includes date and time)
 $timestamp = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'
-$summaryFile = Join-Path -Path $logsPath -ChildPath "diagnostico_rapido_$timestamp.html"
+$summaryFile = Join-Path -Path $logsPath -ChildPath "quick_diagnosis_$timestamp.html"
 
 Write-Host "Starting quick system diagnosis..." -ForegroundColor Green
 Write-Host "Report will be saved in: $summaryFile" -ForegroundColor Gray
@@ -91,36 +91,36 @@ Write-Host "`n[1/4] Checking processor usage..." -ForegroundColor Yellow
 
 $cpuLoad = 0
 try {
-    # MÉTODO 1: Usar contadores de rendimiento (más preciso)
+    # METHOD 1: Use performance counters (more precise)
     try {
         $cpuCounter = Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 -ErrorAction Stop
         $cpuLoad = [int]($cpuCounter.CounterSamples.CookedValue)
-        Write-Host "  → Método usado: Contadores de rendimiento" -ForegroundColor Gray
+        Write-Host "  → Method used: Performance counters" -ForegroundColor Gray
     } catch {
-        # MÉTODO 2: Si el anterior falla, usar WMI (más compatible)
-        Write-Host "  → Usando método alternativo para CPU..." -ForegroundColor Yellow
+        # METHOD 2: If previous fails, use WMI (more compatible)
+        Write-Host "  → Using alternative method for CPU..." -ForegroundColor Yellow
         $cpu = Get-CimInstance -ClassName Win32_Processor -ErrorAction Stop
         $cpuLoad = [int]($cpu.LoadPercentage | Measure-Object -Average).Average
         if (-not $cpuLoad) { 
-            # MÉTODO 3: Último recurso basado en procesos activos
+            # METHOD 3: Last resort based on active processes
             $processes = Get-Process | Where-Object { $_.CPU -gt 0 } | Sort-Object CPU -Descending | Select-Object -First 10
             $cpuLoad = if ($processes) { [math]::Min(50, ($processes | Measure-Object CPU -Sum).Sum / 100) } else { 25 }
-            Write-Host "  → Usando estimación basada en procesos" -ForegroundColor Gray
+            Write-Host "  → Using estimation based on processes" -ForegroundColor Gray
         }
     }
     
-    # Asegurar que el valor esté en rango válido (0-100%)
+    # Ensure value is in valid range (0-100%)
     if ($cpuLoad -lt 0) { $cpuLoad = 0 }
     if ($cpuLoad -gt 100) { $cpuLoad = 100 }
     
-    # Mostrar resultado con código de colores
-    $cpuStatus = if ($cpuLoad -gt 80) { "CRÍTICO"; "Red" } 
-                elseif ($cpuLoad -gt 60) { "ALTO"; "Yellow" } 
+    # Show result with color codes
+    $cpuStatus = if ($cpuLoad -gt 80) { "CRITICAL"; "Red" } 
+                elseif ($cpuLoad -gt 60) { "HIGH"; "Yellow" } 
                 else { "NORMAL"; "Green" }
-    Write-Host "  ✓ CPU Load: $cpuLoad% - Estado: $($cpuStatus[0])" -ForegroundColor $cpuStatus[1]
+    Write-Host "  ✓ CPU Load: $cpuLoad% - Status: $($cpuStatus[0])" -ForegroundColor $cpuStatus[1]
     
 } catch {
-    Add-ITSupportError -Seccion 'CPU' -Mensaje "Error al obtener información de CPU: $($_.Exception.Message)"
+    Add-ITSupportError -Section 'CPU' -Message "Error al obtener información de CPU: $($_.Exception.Message)"
     $cpuLoad = 25  # Valor por defecto si no se puede obtener
     Write-Host "  ⚠ Error obteniendo CPU, usando valor estimado: $cpuLoad%" -ForegroundColor Yellow
 }
@@ -144,10 +144,10 @@ try {
         $memoryGB = [math]::Round($memory.TotalVisibleMemorySize / 1MB, 1)
         
         # Mostrar resultado con código de colores
-        $memStatus = if ($memoryPercentFree -lt 10) { "CRÍTICO"; "Red" } 
+        $memStatus = if ($memoryPercentFree -lt 10) { "CRITICAL"; "Red" } 
                     elseif ($memoryPercentFree -lt 25) { "BAJO"; "Yellow" } 
                     else { "NORMAL"; "Green" }
-        Write-Host "  ✓ Memoria libre: $memoryPercentFree% ($memoryGB GB total) - Estado: $($memStatus[0])" -ForegroundColor $memStatus[1]
+        Write-Host "  ✓ Memoria libre: $memoryPercentFree% ($memoryGB GB total) - Status: $($memStatus[0])" -ForegroundColor $memStatus[1]
         
         # Información adicional útil para el técnico
         $freeGB = [math]::Round(($memory.FreePhysicalMemory / 1MB), 1)
@@ -157,7 +157,7 @@ try {
         throw "No se pudo obtener información válida de memoria"
     }
 } catch {
-    Add-ITSupportError -Seccion 'Memoria' -Mensaje "Error al obtener información de memoria: $($_.Exception.Message)"
+    Add-ITSupportError -Section 'Memoria' -Message "Error al obtener información de memoria: $($_.Exception.Message)"
     Write-Host "  ⚠ Error obteniendo información de memoria" -ForegroundColor Yellow
 }
 
@@ -186,7 +186,7 @@ try {
         Write-Host "    → $desc : $ip" -ForegroundColor Gray
     }
 } catch {
-    Add-ITSupportError -Seccion 'Red' -Mensaje "Error al obtener adaptadores de red: $($_.Exception.Message)"
+    Add-ITSupportError -Section 'Red' -Message "Error al obtener adaptadores de red: $($_.Exception.Message)"
     $networkAdapters = @()
     Write-Host "  ⚠ Error obteniendo adaptadores de red" -ForegroundColor Yellow
 }
@@ -234,7 +234,7 @@ if ($detectedGateway) {
         Write-Host "  ✓ Conectividad al gateway: $($connStatus[0])" -ForegroundColor $connStatus[1]
         
     } catch {
-        Add-ITSupportError -Seccion 'Red-Gateway' -Mensaje "Error al conectar al gateway $detectedGateway`: $($_.Exception.Message)"
+        Add-ITSupportError -Section 'Red-Gateway' -Message "Error al conectar al gateway $detectedGateway`: $($_.Exception.Message)"
         $gatewayConnectivity = $false
         Write-Host "Error probando conectividad al gateway" -ForegroundColor Yellow
     }
@@ -252,7 +252,7 @@ $htmlContent = Get-UnifiedHTMLTemplate -Title "Diagnóstico Rápido de Sistema" 
 
 $htmlContent += @"
         <div class="diagnostic-section">
-            <h2>Estado del Sistema</h2>
+            <h2>System Status</h2>
             <div class="metric $(Get-ModuleStatusClass -ModuleName $moduleName -Status $cpuClass)">
                 <h3>Procesador (CPU)</h3>
                 <p>Uso actual: <strong>$cpuLoad%</strong></p>
@@ -290,7 +290,7 @@ if($detectedGateway) {
             <div class='metric $(Get-ModuleStatusClass -ModuleName $moduleName -Status $connectivityClass)'>
                 <h3>Conectividad al Gateway</h3>
                 <p>Gateway detectado: <strong>$detectedGateway</strong></p>
-                <p>Estado de conexión: <strong>$connectivityStatus</strong></p>
+                <p>Connection status: <strong>$connectivityStatus</strong></p>
             </div>
 "@
 } else {

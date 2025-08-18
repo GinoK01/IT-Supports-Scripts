@@ -1,4 +1,4 @@
-# Intentar configurar la política de ejecución (silenciando errores si falla)
+# Try to configure execution policy (silencing errors if it fails)
 try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction SilentlyContinue
 } catch {
@@ -52,7 +52,7 @@ Clear-ITSupportErrors
 $timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 $htmlFile = Join-Path -Path $logsPath -ChildPath "diagnostico_rendimiento_$timestamp.html"
 
-# Función para obtener información del CPU con múltiples métodos
+# Function to get CPU information with multiple methods
 function Get-CPUInfo {
     Write-Host "Midiendo uso de CPU..." -ForegroundColor Yellow
     
@@ -62,13 +62,13 @@ function Get-CPUInfo {
         LoadSamples = @()
     }
     
-    # Obtener información del procesador
-    $cpuData.Info = Invoke-SafeExecution -Seccion "Rendimiento-CPU-Info" -ScriptBlock {
+    # Get processor information
+    $cpuData.Info = Invoke-SafeExecution -Section "Rendimiento-CPU-Info" -ScriptBlock {
         Get-CimInstance -ClassName Win32_Processor -ErrorAction Stop
     } -DefaultValue $null
     
     # Método 1: Usar Get-Counter (más preciso)
-    $cpuLoad = Invoke-SafeExecution -Seccion "Rendimiento-CPU-Counter" -ScriptBlock {
+    $cpuLoad = Invoke-SafeExecution -Section "Rendimiento-CPU-Counter" -ScriptBlock {
         Write-Host "  Tomando múltiples muestras de CPU..." -ForegroundColor Gray
         $samples = @()
         
@@ -96,7 +96,7 @@ function Get-CPUInfo {
     
     # Método 2: Fallback usando WMI (menos preciso pero más compatible)
     if (-not $cpuLoad) {
-        $cpuLoad = Invoke-SafeExecution -Seccion "Rendimiento-CPU-WMI" -ScriptBlock {
+        $cpuLoad = Invoke-SafeExecution -Section "Rendimiento-CPU-WMI" -ScriptBlock {
             Write-Host "  Usando método WMI como respaldo..." -ForegroundColor Gray
             $wmiSamples = @()
             
@@ -129,7 +129,7 @@ function Get-CPUInfo {
     
     # Método 3: Último recurso usando proceso PowerShell
     if (-not $cpuLoad) {
-        $cpuLoad = Invoke-SafeExecution -Seccion "Rendimiento-CPU-Process" -ScriptBlock {
+        $cpuLoad = Invoke-SafeExecution -Section "Rendimiento-CPU-Process" -ScriptBlock {
             Write-Host "  Estimando CPU desde procesos..." -ForegroundColor Gray
             # Estimar carga basada en procesos activos (muy aproximado)
             $processes = Get-Process | Where-Object { $_.CPU -gt 0 }
@@ -149,12 +149,12 @@ function Get-CPUInfo {
     return $cpuData
 }
 
-# Función para obtener información de memoria con métodos robustos
+# Function to get memory information with robust methods
 function Get-MemoryInfo {
     Write-Host "Analizando uso de memoria..." -ForegroundColor Yellow
     
     # Método 1: Usar Win32_OperatingSystem (más confiable)
-    $memory = Invoke-SafeExecution -Seccion "Rendimiento-Memoria" -ScriptBlock {
+    $memory = Invoke-SafeExecution -Section "Rendimiento-Memoria" -ScriptBlock {
         Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop
     } -DefaultValue $null
     
@@ -179,7 +179,7 @@ function Get-MemoryInfo {
     }
     
     # Método 2: Fallback usando Get-Counter
-    $memoryCounter = Invoke-SafeExecution -Seccion "Rendimiento-Memoria-Counter" -ScriptBlock {
+    $memoryCounter = Invoke-SafeExecution -Section "Rendimiento-Memoria-Counter" -ScriptBlock {
         $availableBytes = Get-Counter "\Memory\Available Bytes" -ErrorAction Stop
         $commitLimit = Get-Counter "\Memory\Commit Limit" -ErrorAction Stop
         
@@ -203,16 +203,16 @@ function Get-MemoryInfo {
         return $memoryCounter
     }
     
-    Add-ITSupportError -Seccion "Rendimiento-Memoria" -Mensaje "No se pudo obtener información de memoria con ningún método" -Severidad "Error"
+    Add-ITSupportError -Section "Rendimiento-Memoria" -Message "Could not get memory information with any method" -Severity "Error"
     return $null
 }
 
-# Función para obtener información de discos con mejor detalle
+# Function to get disk information with better detail
 function Get-DiskInfo {
     Write-Host "Analizando espacio en disco..." -ForegroundColor Yellow
     
     # Método 1: Usar Get-CimInstance (más moderno)
-    $disks = Invoke-SafeExecution -Seccion "Rendimiento-Discos-CIM" -ScriptBlock {
+    $disks = Invoke-SafeExecution -Section "Rendimiento-Discos-CIM" -ScriptBlock {
         Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DriveType=3" -ErrorAction Stop | 
         Where-Object { $_.Size -gt 0 } |
         Select-Object DeviceID, 
@@ -225,7 +225,7 @@ function Get-DiskInfo {
     
     # Método 2: Fallback usando WMI clásico
     if ($disks.Count -eq 0) {
-        $disks = Invoke-SafeExecution -Seccion "Rendimiento-Discos-WMI" -ScriptBlock {
+        $disks = Invoke-SafeExecution -Section "Rendimiento-Discos-WMI" -ScriptBlock {
             Get-WmiObject -Class Win32_LogicalDisk -Filter "DriveType=3" -ErrorAction Stop |
             Where-Object { $_.Size -gt 0 } |
             Select-Object DeviceID,
@@ -239,7 +239,7 @@ function Get-DiskInfo {
     
     # Método 3: Último recurso usando Get-PSDrive
     if ($disks.Count -eq 0) {
-        $disks = Invoke-SafeExecution -Seccion "Rendimiento-Discos-PSDrive" -ScriptBlock {
+        $disks = Invoke-SafeExecution -Section "Rendimiento-Discos-PSDrive" -ScriptBlock {
             Get-PSDrive -PSProvider FileSystem -ErrorAction Stop |
             Where-Object { $_.Used -gt 0 -and $_.Free -gt 0 } |
             Select-Object @{Name="DeviceID";Expression={"$($_.Name):"}},
@@ -260,7 +260,7 @@ function Get-TopProcesses {
     Write-Host "Analizando procesos con mayor consumo de recursos..." -ForegroundColor Yellow
     
     # Obtener top procesos por uso acumulado de CPU (más confiable)
-    $topCPUProcesses = Invoke-SafeExecution -Seccion "Rendimiento-Procesos-CPU" -DefaultValue @() -ScriptBlock {
+    $topCPUProcesses = Invoke-SafeExecution -Section "Rendimiento-Procesos-CPU" -DefaultValue @() -ScriptBlock {
         Get-Process -ErrorAction Stop | 
         Where-Object {$_.CPU -gt 0} | 
         Sort-Object -Property CPU -Descending | 
@@ -271,7 +271,7 @@ function Get-TopProcesses {
     }
     
     # Intentar obtener uso de CPU en tiempo real usando contadores de performance
-    $realtimeCPUProcesses = Invoke-SafeExecution -Seccion "Rendimiento-Procesos-CPU-Tiempo-Real" -DefaultValue @() -ScriptBlock {
+    $realtimeCPUProcesses = Invoke-SafeExecution -Section "Rendimiento-Procesos-CPU-Tiempo-Real" -DefaultValue @() -ScriptBlock {
         try {
             # Usar Get-Counter para obtener uso actual de CPU por proceso
             $counter = Get-Counter "\Process(*)\% Processor Time" -ErrorAction Stop
@@ -320,7 +320,7 @@ function Get-TopProcesses {
         }
     }
     
-    $topMemoryProcesses = Invoke-SafeExecution -Seccion "Rendimiento-Procesos-Memoria" -DefaultValue @() -ScriptBlock {
+    $topMemoryProcesses = Invoke-SafeExecution -Section "Rendimiento-Procesos-Memoria" -DefaultValue @() -ScriptBlock {
         Get-Process -ErrorAction Stop | 
         Sort-Object -Property WorkingSet -Descending | 
         Select-Object -First 5 |
@@ -348,9 +348,9 @@ $cpuClass = if($cpuInfo.Load -gt 80){'critical'}elseif($cpuInfo.Load -gt 60){'wa
 
 # Registrar problemas de CPU
 if ($cpuInfo.Load -gt 80) {
-    Add-ITSupportError -Seccion "Rendimiento - CPU" -Mensaje "El uso de CPU es crítico: $($cpuInfo.Load)%" -Severidad "Critical"
+    Add-ITSupportError -Section "Rendimiento - CPU" -Message "El uso de CPU es crítico: $($cpuInfo.Load)%" -Severity "Critical"
 } elseif ($cpuInfo.Load -gt 60) {
-    Add-ITSupportError -Seccion "Rendimiento - CPU" -Mensaje "El uso de CPU es alto: $($cpuInfo.Load)%" -Severidad "Warning"
+    Add-ITSupportError -Section "Rendimiento - CPU" -Message "El uso de CPU es alto: $($cpuInfo.Load)%" -Severity "Warning"
 }
 $htmlContent += "`n<div class=`"diagnostic-section $(Get-ModuleStatusClass -ModuleName $moduleName -Status $cpuClass)`">`n"
 $htmlContent += "<h2>Procesador (CPU)</h2>`n"
@@ -382,12 +382,12 @@ $memoryClass = if($memoryInfo -and $memoryInfo.PercentUsed -gt 90){'critical'}el
 # Registrar problemas de memoria
 if ($memoryInfo) {
     if ($memoryInfo.PercentUsed -gt 90) {
-        Add-ITSupportError -Seccion "Rendimiento - Memoria" -Mensaje "El uso de memoria RAM es crítico: $($memoryInfo.PercentUsed)%" -Severidad "Critical"
+        Add-ITSupportError -Section "Rendimiento - Memoria" -Message "El uso de memoria RAM es crítico: $($memoryInfo.PercentUsed)%" -Severity "Critical"
     } elseif ($memoryInfo.PercentUsed -gt 75) {
-        Add-ITSupportError -Seccion "Rendimiento - Memoria" -Mensaje "El uso de memoria RAM es alto: $($memoryInfo.PercentUsed)%" -Severidad "Warning"
+        Add-ITSupportError -Section "Rendimiento - Memoria" -Message "El uso de memoria RAM es alto: $($memoryInfo.PercentUsed)%" -Severity "Warning"
     }
 } else {
-    Add-ITSupportError -Seccion "Rendimiento - Memoria" -Mensaje "No se pudo obtener información de memoria RAM" -Severidad "Warning"
+    Add-ITSupportError -Section "Rendimiento - Memoria" -Message "Could not get RAM memory information" -Severity "Warning"
 }
 $htmlContent += "`n<div class=`"diagnostic-section $(Get-ModuleStatusClass -ModuleName $moduleName -Status $memoryClass)`">`n"
 $htmlContent += "<h2>Memoria RAM</h2>`n"
@@ -401,7 +401,7 @@ if ($memoryInfo) {
     $htmlContent += "</div>`n"
 } else {
     $htmlContent += "<div class=`"metric critical`">`n"
-    $htmlContent += "<p>No se pudo obtener información de memoria</p>`n"
+    $htmlContent += "<p>Could not get memory information</p>`n"
     $htmlContent += "</div>`n"
 }
 
@@ -441,9 +441,9 @@ if ($diskInfo.Count -gt 0) {
         
         # Registrar problemas de espacio en disco
         if ($disk.PercentFree -lt 10) {
-            Add-ITSupportError -Seccion "Rendimiento - Disco" -Mensaje "Espacio en disco crítico en unidad $($disk.DeviceID): $($disk.PercentFree)% libre" -Severidad "Critical"
+            Add-ITSupportError -Section "Rendimiento - Disco" -Message "Espacio en disco crítico en unidad $($disk.DeviceID): $($disk.PercentFree)% libre" -Severity "Critical"
         } elseif ($disk.PercentFree -lt 20) {
-            Add-ITSupportError -Seccion "Rendimiento - Disco" -Mensaje "Espacio en disco bajo en unidad $($disk.DeviceID): $($disk.PercentFree)% libre" -Severidad "Warning"
+            Add-ITSupportError -Section "Rendimiento - Disco" -Message "Espacio en disco bajo en unidad $($disk.DeviceID): $($disk.PercentFree)% libre" -Severity "Warning"
         }
         
         $htmlContent += "<tr class='$diskClassWithModule'>`n"
@@ -462,7 +462,7 @@ if ($diskInfo.Count -gt 0) {
     $htmlContent += "</div>`n"
 } else {
     # Registrar que no se pudieron detectar discos
-    Add-ITSupportError -Seccion "Rendimiento - Disco" -Mensaje "No se pudieron detectar unidades de disco" -Severidad "Critical"
+    Add-ITSupportError -Section "Rendimiento - Disco" -Message "No se pudieron detectar unidades de disco" -Severity "Critical"
     
     $htmlContent += "<div class=`"metric critical`">`n"
     $htmlContent += "<p>No se pudieron detectar unidades de disco</p>`n"

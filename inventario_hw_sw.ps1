@@ -1,4 +1,4 @@
-# Intentar configurar la política de ejecución (silenciando errores si falla)
+# Try to configure execution policy (silencing errors if it fails)
 try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction SilentlyContinue
 } catch {
@@ -54,63 +54,63 @@ $htmlFile = Join-Path -Path $logsPath -ChildPath "inventario_hw_sw_$timestamp.ht
 
 Write-Host "Iniciando inventario de hardware y software..." -ForegroundColor Green
 
-# Función para obtener información de hardware
+# Function to get hardware information
 function Get-HardwareInfo {
-    Write-Host "Recopilando información de hardware..." -ForegroundColor Yellow
+    Write-Host "Collecting hardware information..." -ForegroundColor Yellow
     
     $hardwareInfo = @{}
     
     # Información del sistema
-    $hardwareInfo.System = Invoke-SafeExecution -Seccion "Inventario-Sistema" -ScriptBlock {
+    $hardwareInfo.System = Invoke-SafeExecution -Section "Inventario-Sistema" -ScriptBlock {
         Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction Stop
     } -DefaultValue $null
     
     # Información del procesador
-    $hardwareInfo.Processor = Invoke-SafeExecution -Seccion "Inventario-Procesador" -ScriptBlock {
+    $hardwareInfo.Processor = Invoke-SafeExecution -Section "Inventario-Procesador" -ScriptBlock {
         Get-CimInstance -ClassName Win32_Processor -ErrorAction Stop
     } -DefaultValue $null
     
     # Información de memoria
-    $hardwareInfo.Memory = Invoke-SafeExecution -Seccion "Inventario-Memoria" -ScriptBlock {
+    $hardwareInfo.Memory = Invoke-SafeExecution -Section "Inventario-Memoria" -ScriptBlock {
         Get-CimInstance -ClassName Win32_PhysicalMemory -ErrorAction Stop
     } -DefaultValue @()
     
     # Información de discos
-    $hardwareInfo.Disks = Invoke-SafeExecution -Seccion "Inventario-Discos" -ScriptBlock {
+    $hardwareInfo.Disks = Invoke-SafeExecution -Section "Inventario-Discos" -ScriptBlock {
         Get-CimInstance -ClassName Win32_LogicalDisk -ErrorAction Stop
     } -DefaultValue @()
     
     # Información de adaptadores de red
-    $hardwareInfo.NetworkAdapters = Invoke-SafeExecution -Seccion "Inventario-Red" -ScriptBlock {
+    $hardwareInfo.NetworkAdapters = Invoke-SafeExecution -Section "Inventario-Red" -ScriptBlock {
         Get-CimInstance -ClassName Win32_NetworkAdapter -Filter "NetConnectionStatus=2" -ErrorAction Stop
     } -DefaultValue @()
     
     # Información de la placa madre
-    $hardwareInfo.Motherboard = Invoke-SafeExecution -Seccion "Inventario-PlacaMadre" -ScriptBlock {
+    $hardwareInfo.Motherboard = Invoke-SafeExecution -Section "Inventario-PlacaMadre" -ScriptBlock {
         Get-CimInstance -ClassName Win32_BaseBoard -ErrorAction Stop
     } -DefaultValue $null
     
     # Información de video
-    $hardwareInfo.VideoController = Invoke-SafeExecution -Seccion "Inventario-Video" -ScriptBlock {
+    $hardwareInfo.VideoController = Invoke-SafeExecution -Section "Inventario-Video" -ScriptBlock {
         Get-CimInstance -ClassName Win32_VideoController -ErrorAction Stop
     } -DefaultValue @()
     
     return $hardwareInfo
 }
 
-# Función para obtener información de software
+# Function to get software information
 function Get-SoftwareInfo {
-    Write-Host "Recopilando información de software..." -ForegroundColor Yellow
+    Write-Host "Collecting software information..." -ForegroundColor Yellow
     
     $softwareInfo = @{}
     
     # Sistema operativo
-    $softwareInfo.OS = Invoke-SafeExecution -Seccion "Inventario-SO" -ScriptBlock {
+    $softwareInfo.OS = Invoke-SafeExecution -Section "Inventario-SO" -ScriptBlock {
         Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop
     } -DefaultValue $null
     
     # Software instalado desde el registro (más rápido que Win32_Product)
-    $softwareInfo.InstalledPrograms = Invoke-SafeExecution -Seccion "Inventario-Software-Registro" -ScriptBlock {
+    $softwareInfo.InstalledPrograms = Invoke-SafeExecution -Section "Inventario-Software-Registro" -ScriptBlock {
         $programs = @()
         
         Write-Host "  Escaneando programas instalados..." -ForegroundColor Gray
@@ -223,7 +223,7 @@ function Get-SoftwareInfo {
     } -DefaultValue @()
     
     # Servicios importantes
-    $softwareInfo.Services = Invoke-SafeExecution -Seccion "Inventario-Servicios" -ScriptBlock {
+    $softwareInfo.Services = Invoke-SafeExecution -Section "Inventario-Servicios" -ScriptBlock {
         Get-Service -ErrorAction Stop | Where-Object { 
             $_.Status -eq 'Running' -and 
             ($_.Name -like "*antivirus*" -or 
@@ -237,7 +237,7 @@ function Get-SoftwareInfo {
     } -DefaultValue @()
     
     # Procesos actuales (top 10)
-    $softwareInfo.TopProcesses = Invoke-SafeExecution -Seccion "Inventario-Procesos" -ScriptBlock {
+    $softwareInfo.TopProcesses = Invoke-SafeExecution -Section "Inventario-Procesos" -ScriptBlock {
         Get-Process -ErrorAction Stop | 
         Sort-Object WorkingSet -Descending | 
         Select-Object -First 10 |
@@ -247,7 +247,7 @@ function Get-SoftwareInfo {
     return $softwareInfo
 }
 
-# Ejecutar recopilación de información
+# Execute information collection
 $hardwareInfo = Get-HardwareInfo
 $softwareInfo = Get-SoftwareInfo
 
@@ -294,9 +294,9 @@ if ($hardwareInfo.Disks.Count -gt 0) {
             
             # Registrar problemas de espacio en disco
             if ($percentFree -lt 10) {
-                Add-ITSupportError -Seccion "Inventario - Disco" -Mensaje "Espacio en disco crítico en unidad $($disk.DeviceID): $percentFree% libre" -Severidad "Critical"
+                Add-ITSupportError -Section "Inventario - Disco" -Message "Espacio en disco crítico en unidad $($disk.DeviceID): $percentFree% libre" -Severity "Critical"
             } elseif ($percentFree -lt 20) {
-                Add-ITSupportError -Seccion "Inventario - Disco" -Mensaje "Espacio en disco bajo en unidad $($disk.DeviceID): $percentFree% libre" -Severidad "Warning"
+                Add-ITSupportError -Section "Inventario - Disco" -Message "Espacio en disco bajo en unidad $($disk.DeviceID): $percentFree% libre" -Severity "Warning"
             }
             
             $htmlContent += "<tr class='$diskClass'><td>$($disk.DeviceID)</td><td>$size</td><td>$free</td><td>$percentFree%</td><td>$statusText</td></tr>"
@@ -327,7 +327,7 @@ if ($softwareInfo.InstalledPrograms.Count -gt 0) {
     }
 } else {
     # Registrar que no se pudieron detectar programas instalados
-    Add-ITSupportError -Seccion "Inventario - Software" -Mensaje "No se pudieron detectar programas instalados - puede deberse a permisos insuficientes" -Severidad "Critical"
+    Add-ITSupportError -Section "Inventario - Software" -Message "No se pudieron detectar programas instalados - puede deberse a permisos insuficientes" -Severity "Critical"
     
     $htmlContent += "<p class='critical'><strong>ERROR:</strong> No se pudieron detectar programas instalados</p>"
     $htmlContent += "<p>Esto puede deberse a permisos insuficientes o problemas de acceso al registro</p>"

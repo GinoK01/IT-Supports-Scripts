@@ -1,11 +1,11 @@
-# Intentar configurar la política de ejecución (silenciando errores si falla)
+# Try to configure execution policy (silencing errors if it fails)
 try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction SilentlyContinue
 } catch {
-    # Continuar sin mostrar error
+    # Continue without showing error
 }
 
-# Configurar soporte UTF-8
+# Configure UTF-8 support
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 # Asegurar que el directorio de logs y reportes exista
@@ -114,7 +114,7 @@ function Find-BackupFiles {
     foreach ($path in $searchPaths) {
         if (Test-Path $path) {
             foreach ($pattern in $backupPatterns) {
-                $files = Invoke-SafeExecution -Seccion "Busqueda-Respaldos" -DefaultValue @() -ScriptBlock {
+                $files = Invoke-SafeExecution -Section "Busqueda-Respaldos" -DefaultValue @() -ScriptBlock {
                     Get-ChildItem -Path $path -Filter $pattern -Recurse -File -ErrorAction SilentlyContinue | 
                     Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-30) } # Solo últimos 30 días
                 }
@@ -160,7 +160,7 @@ function Find-RecoverableTempFiles {
     
     foreach ($path in $tempPaths) {
         if (Test-Path $path) {
-            $files = Invoke-SafeExecution -Seccion "Busqueda-Temporales" -DefaultValue @() -ScriptBlock {
+            $files = Invoke-SafeExecution -Section "Busqueda-Temporales" -DefaultValue @() -ScriptBlock {
                 Get-ChildItem -Path $path -File -Recurse -ErrorAction SilentlyContinue | 
                 Where-Object { 
                     $_.Extension -in $recoverableExtensions -and 
@@ -198,7 +198,7 @@ function Analyze-RecycleBin {
     
     $recycleBinItems = @()
     
-    $result = Invoke-SafeExecution -Seccion "Analisis-PapeleraReciclaje" -DefaultValue @() -ScriptBlock {
+    $result = Invoke-SafeExecution -Section "Analisis-PapeleraReciclaje" -DefaultValue @() -ScriptBlock {
         try {
             # Usar COM object para acceder a la papelera
             $shell = New-Object -ComObject Shell.Application
@@ -259,7 +259,7 @@ function Find-ShadowCopies {
     
     $shadowCopies = @()
     
-    $result = Invoke-SafeExecution -Seccion "Busqueda-CopiaSombra" -DefaultValue @() -ScriptBlock {
+    $result = Invoke-SafeExecution -Section "Busqueda-CopiaSombra" -DefaultValue @() -ScriptBlock {
         try {
             # Listar snapshots disponibles
             $vssSnapshots = vssadmin list shadows 2>$null
@@ -304,7 +304,7 @@ function Find-RecentFiles {
     
     foreach ($path in $recentPaths) {
         if (Test-Path $path) {
-            $files = Invoke-SafeExecution -Seccion "Busqueda-Recientes" -DefaultValue @() -ScriptBlock {
+            $files = Invoke-SafeExecution -Section "Busqueda-Recientes" -DefaultValue @() -ScriptBlock {
                 Get-ChildItem -Path $path -File -ErrorAction SilentlyContinue | 
                 Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-14) }
             }
@@ -354,7 +354,7 @@ function Find-FileVersions {
     
     foreach ($folder in $importantFolders) {
         if (Test-Path $folder) {
-            $result = Invoke-SafeExecution -Seccion "Busqueda-Versiones" -DefaultValue @() -ScriptBlock {
+            $result = Invoke-SafeExecution -Section "Busqueda-Versiones" -DefaultValue @() -ScriptBlock {
                 # Buscar archivos con múltiples versiones (numerados)
                 Get-ChildItem -Path $folder -File -Recurse -ErrorAction SilentlyContinue | 
                 Where-Object { 

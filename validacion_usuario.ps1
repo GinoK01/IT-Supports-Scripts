@@ -1,11 +1,11 @@
-# Intentar configurar la política de ejecución (silenciando errores si falla)
+# Try to configure execution policy (silencing errors if it fails)
 try {
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction SilentlyContinue
 } catch {
-    # Continuar sin mostrar error
+    # Continue without showing error
 }
 
-# Configurar soporte UTF-8
+# Configure UTF-8 support
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 # Asegurar que el directorio de logs y reportes exista
@@ -71,7 +71,7 @@ $htmlFile = Join-Path -Path $logsPath -ChildPath "validacion_usuario_$timestamp.
 $dateTimeFormatted = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $username = $env:USERNAME
 
-Write-Host "Iniciando validación de configuración de usuario..." -ForegroundColor Green
+Write-Host "Starting user configuration validation..." -ForegroundColor Green
 
 # Limpiar variables de ejecuciones anteriores cuando se ejecuta desde el script maestro
 if (Get-Variable -Name "userValidationResults" -Scope Script -ErrorAction SilentlyContinue) {
@@ -106,7 +106,7 @@ function Test-UserFolders {
     )
     
     foreach ($folder in $userFolders) {
-        $result = Invoke-SafeExecution -Seccion "Validacion-Usuario-$($folder.Name)" -ScriptBlock {
+        $result = Invoke-SafeExecution -Section "Validacion-Usuario-$($folder.Name)" -ScriptBlock {
             $exists = Test-Path $folder.Path -ErrorAction Stop
             $readable = if ($exists) { 
                 try { Get-ChildItem $folder.Path -ErrorAction Stop | Out-Null; $true } catch { $false }
@@ -138,12 +138,12 @@ function Test-UserPermissions {
     Write-Host "Validando permisos del usuario..." -ForegroundColor Yellow
     
     # Verificar si es administrador
-    $isAdmin = Invoke-SafeExecution -Seccion "Validacion-Usuario-Admin" -ScriptBlock {
+    $isAdmin = Invoke-SafeExecution -Section "Validacion-Usuario-Admin" -ScriptBlock {
         ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
     } -DefaultValue $false
     
     # Información del usuario actual
-    $userInfo = Invoke-SafeExecution -Seccion "Validacion-Usuario-Info" -ScriptBlock {
+    $userInfo = Invoke-SafeExecution -Section "Validacion-Usuario-Info" -ScriptBlock {
         # Crear hashtable de forma segura para evitar duplicados
         $infoHash = [ordered]@{}
         $infoHash['UserName'] = $env:USERNAME
@@ -178,7 +178,7 @@ function Test-EnvironmentVariables {
     )
     
     foreach ($var in $envVars) {
-        $value = Invoke-SafeExecution -Seccion "Validacion-Usuario-Env-$var" -ScriptBlock {
+        $value = Invoke-SafeExecution -Section "Validacion-Usuario-Env-$var" -ScriptBlock {
             [Environment]::GetEnvironmentVariable($var)
         } -DefaultValue $null
         
@@ -240,7 +240,7 @@ if ($folderResults.Count -gt 0) {
     $htmlSections += "</table></div>"
 }
 
-# Sección de información del usuario
+# User information section
 $userInfo = ($script:userValidationResults | Where-Object { $_.Name -eq "Información del Usuario" }).Details
 if ($userInfo) {
     $htmlSections += @"
@@ -280,7 +280,7 @@ $htmlContent = $htmlHeader + $htmlSections + $htmlFooter
 # Guardar archivo HTML
 [System.IO.File]::WriteAllText($htmlFile, $htmlContent, [System.Text.Encoding]::UTF8)
 
-Write-Host "Validación de configuración de usuario completada."
+Write-Host "User configuration validation completed."
 Write-Host "Reporte HTML: $htmlFile"
 Write-Host ""
 Write-Host "RESUMEN:" -ForegroundColor Cyan
