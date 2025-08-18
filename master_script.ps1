@@ -3,7 +3,7 @@
 # ====================================================================
 #
 # PURPOSE:
-# This is the main script that gives access to all diagnostic tools
+# This is the main script that gives access to all diagnostic tools.
 # It works as a "control center" for support technicians
 #
 # FEATURES:
@@ -41,7 +41,7 @@ function Initialize-ExecutionPolicy {
     foreach ($method in $methods) {
         try {
             & $method
-            Write-Host "✓ Execution policy configured correctly" -ForegroundColor Green
+            Write-Host "Execution policy configured correctly" -ForegroundColor Green
             $success = $true
             break
         } catch {
@@ -52,7 +52,7 @@ function Initialize-ExecutionPolicy {
     # If no method worked, show detailed help
     if (-not $success) {
         Write-Host ""
-        Write-Host "⚠️  WARNING: Could not configure execution policy" -ForegroundColor Red
+        Write-Host "WARNING: Could not configure execution policy" -ForegroundColor Red
         Write-Host "This may cause problems when running scripts." -ForegroundColor Yellow
         Write-Host ""
         Write-Host "RECOMMENDED SOLUTIONS:" -ForegroundColor Cyan
@@ -158,9 +158,9 @@ function Execute-Task($choice) {
     $errorHandlerPath = Join-Path -Path $scriptPath -ChildPath "ErrorHandler.ps1"
     if (Test-Path $errorHandlerPath) {
         . $errorHandlerPath
-        Write-Host "✓ ErrorHandler loaded correctly" -ForegroundColor Green
+        Write-Host "ErrorHandler loaded correctly" -ForegroundColor Green
     } else {
-        Write-Host "⚠️  Warning: ErrorHandler.ps1 not found" -ForegroundColor Yellow
+        Write-Host "Warning: ErrorHandler.ps1 not found" -ForegroundColor Yellow
     }
 
     switch ($choice) {
@@ -170,9 +170,11 @@ function Execute-Task($choice) {
             if (Test-ScriptExists $script) {
                 Write-Host "Running Simple Diagnosis..." -ForegroundColor Green
                 try {
-                    . "$scriptPath\$script"
+                    $scriptFullPath = Join-Path -Path $scriptPath -ChildPath $script
+                    Write-Host "Executing: $scriptFullPath" -ForegroundColor Cyan
+                    & "$scriptFullPath"
                 } catch {
-                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host ("Error running " + $script + ": " + $_.Exception.Message) -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
@@ -184,9 +186,11 @@ function Execute-Task($choice) {
             if (Test-ScriptExists $script) {
                 Write-Host "Running Complete Diagnosis..." -ForegroundColor Green
                 try {
-                    . "$scriptPath\$script"
+                    $scriptFullPath = Join-Path -Path $scriptPath -ChildPath $script
+                    Write-Host "Executing: $scriptFullPath" -ForegroundColor Cyan
+                    & "$scriptFullPath"
                 } catch {
-                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host ("Error running " + $script + ": " + $_.Exception.Message) -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
@@ -198,9 +202,11 @@ function Execute-Task($choice) {
             if (Test-ScriptExists $script) {
                 Write-Host "Running Critical Folders Backup..." -ForegroundColor Green
                 try {
-                    . "$scriptPath\$script"
+                    $scriptFullPath = Join-Path -Path $scriptPath -ChildPath $script
+                    Write-Host "Executing: $scriptFullPath" -ForegroundColor Cyan
+                    & "$scriptFullPath"
                 } catch {
-                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host ("Error running " + $script + ": " + $_.Exception.Message) -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
@@ -212,9 +218,11 @@ function Execute-Task($choice) {
             if (Test-ScriptExists $script) {
                 Write-Host "Running File Recovery..." -ForegroundColor Green
                 try {
-                    . "$scriptPath\$script"
+                    $scriptFullPath = Join-Path -Path $scriptPath -ChildPath $script
+                    Write-Host "Executing: $scriptFullPath" -ForegroundColor Cyan
+                    & "$scriptFullPath"
                 } catch {
-                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host ("Error running " + $script + ": " + $_.Exception.Message) -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
@@ -226,9 +234,11 @@ function Execute-Task($choice) {
             if (Test-ScriptExists $script) {
                 Write-Host "Running Cleanup and Maintenance..." -ForegroundColor Green
                 try {
-                    . "$scriptPath\$script"
+                    $scriptFullPath = Join-Path -Path $scriptPath -ChildPath $script
+                    Write-Host "Executing: $scriptFullPath" -ForegroundColor Cyan
+                    & "$scriptFullPath"
                 } catch {
-                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host ("Error running " + $script + ": " + $_.Exception.Message) -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
@@ -240,9 +250,11 @@ function Execute-Task($choice) {
             if (Test-ScriptExists $script) {
                 Write-Host "Running Hardware and Software Inventory..." -ForegroundColor Green
                 try {
-                    . "$scriptPath\$script"
+                    $scriptFullPath = Join-Path -Path $scriptPath -ChildPath $script
+                    Write-Host "Executing: $scriptFullPath" -ForegroundColor Cyan
+                    & "$scriptFullPath"
                 } catch {
-                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host ("Error running " + $script + ": " + $_.Exception.Message) -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
@@ -254,9 +266,11 @@ function Execute-Task($choice) {
             if (Test-ScriptExists $script) {
                 Write-Host "Running User Validation..." -ForegroundColor Green
                 try {
-                    . "$scriptPath\$script"
+                    $scriptFullPath = Join-Path -Path $scriptPath -ChildPath $script
+                    Write-Host "Executing: $scriptFullPath" -ForegroundColor Cyan
+                    & "$scriptFullPath"
                 } catch {
-                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host ("Error running " + $script + ": " + $_.Exception.Message) -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
@@ -268,9 +282,11 @@ function Execute-Task($choice) {
             if (Test-ScriptExists $script) {
                 Write-Host "Running Security Scan..." -ForegroundColor Green
                 try {
-                    . "$scriptPath\$script"
+                    $scriptFullPath = Join-Path -Path $scriptPath -ChildPath $script
+                    Write-Host "Executing: $scriptFullPath" -ForegroundColor Cyan
+                    & "$scriptFullPath"
                 } catch {
-                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host ("Error running " + $script + ": " + $_.Exception.Message) -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
@@ -282,9 +298,11 @@ function Execute-Task($choice) {
             if (Test-ScriptExists $script) {
                 Write-Host "Running Network Diagnosis..." -ForegroundColor Green
                 try {
-                    . "$scriptPath\$script"
+                    $scriptFullPath = Join-Path -Path $scriptPath -ChildPath $script
+                    Write-Host "Executing: $scriptFullPath" -ForegroundColor Cyan
+                    & "$scriptFullPath"
                 } catch {
-                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host ("Error running " + $script + ": " + $_.Exception.Message) -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
@@ -296,9 +314,11 @@ function Execute-Task($choice) {
             if (Test-ScriptExists $script) {
                 Write-Host "Running Performance Diagnosis..." -ForegroundColor Green
                 try {
-                    . "$scriptPath\$script"
+                    $scriptFullPath = Join-Path -Path $scriptPath -ChildPath $script
+                    Write-Host "Executing: $scriptFullPath" -ForegroundColor Cyan
+                    & "$scriptFullPath"
                 } catch {
-                    Write-Host "Error running $script`: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host ("Error running " + $script + ": " + $_.Exception.Message) -ForegroundColor Red
                 }
             } else {
                 Show-ScriptMissing $script
